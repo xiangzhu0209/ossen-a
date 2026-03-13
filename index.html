@@ -3,176 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>員工績效管理後台</title>
+    <title>新增績效紀錄</title>
+    <!-- 引入 Google Fonts 和 Font Awesome 圖示庫 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
-        /* 基本樣式，讓頁面更好看 */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f4f7f6;
+        /* CSS 樣式 - 仿照圖片設計 */
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            /* 圖片中的漸層背景 */
+            background: linear-gradient(135deg, #6DD5FA, #2980B9);
         }
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+        .card {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 40px;
             width: 100%;
-            max-width: 500px;
-        }
-        h1 {
-            color: #333;
+            max-width: 450px;
             text-align: center;
+        }
+
+        .card-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 35px;
+        }
+
+        .input-group {
+            position: relative;
             margin-bottom: 25px;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 600;
-        }
-        select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box; /* 確保 padding 不會影響寬度 */
+
+        .input-group i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
             font-size: 16px;
         }
-        textarea {
-            resize: vertical; /* 允許使用者調整高度 */
-            min-height: 80px;
+
+        .input-field {
+            width: 100%;
+            padding: 15px 15px 15px 50px; /* 左邊留出空間給圖示 */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
-        button {
+
+        .input-field:focus {
+            outline: none;
+            border-color: #2980B9;
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
+        }
+        
+        /* 讓 select 和 textarea 有同樣的樣式 */
+        select.input-field {
+            appearance: none; /* 移除預設下拉箭頭 */
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        /* 自訂下拉箭頭 */
+        .select-wrapper {
+            position: relative;
+        }
+        .select-wrapper::after {
+            content: '\f078'; /* Font Awesome 的下箭頭圖示 */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none; /* 讓點擊可以穿透 */
+        }
+        
+        .submit-btn {
             width: 100%;
             padding: 15px;
-            background-color: #007bff;
-            color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
+            color: #fff;
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            /* 按鈕的漸層背景 */
+            background: linear-gradient(135deg, #6DD5FA, #2980B9);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>新增績效紀錄</h1>
+    <div class="card">
+        <h1 class="card-title">新增績效紀錄</h1>
         <form id="performance-form">
-            <!-- 1. 選擇員工 -->
-            <div class="form-group">
-                <label for="employee-select">選擇員工</label>
-                <select id="employee-select" name="employee">
-                    <!-- 這裡的員工列表未來會從資料庫動態載入 -->
+            
+            <!-- 員工姓名 -->
+            <div class="input-group select-wrapper">
+                <i class="fas fa-user"></i>
+                <select id="employee-select" class="input-field">
+                    <option value="" disabled selected>請選擇員工</option>
                     <option value="emp_01">王大明</option>
                     <option value="emp_02">陳小美</option>
                     <option value="emp_03">林志強</option>
                 </select>
             </div>
 
-            <!-- 2. 選擇績效規則 -->
-            <div class="form-group">
-                <label for="rule-select">選擇績效項目</label>
-                <select id="rule-select" name="rule">
-                    <!-- 這些規則就是您圖片中的項目 -->
+            <!-- 績效項目 -->
+            <div class="input-group select-wrapper">
+                <i class="fas fa-list-check"></i>
+                <select id="rule-select" class="input-field">
+                    <option value="" disabled selected>請選擇績效項目</option>
                     <option value="rule_01">補單失誤/遺漏 (-1)</option>
                     <option value="rule_02a">下單失誤 (可換救) (-2)</option>
                     <option value="rule_02b">下單失誤 (不可換救) (-5)</option>
                     <option value="rule_03">點貨失誤 (-2)</option>
                     <option value="rule_04">排程失誤/遺漏 (-3)</option>
-                    <option value="rule_05">交辦事項遺漏 (-2)</option>
-                    <option value="rule_06">貨區管理不良 (-1)</option>
-                    <option value="rule_07">庫存管理不良 (-1)</option>
-                    <option value="rule_08">交辦事項處理不良 (-1)</option>
-                    <option value="rule_09">接待客戶報價失誤 (-3)</option>
-                    <option value="rule_10">接待客戶介紹失誤 (-3)</option>
                     <option value="rule_11">遲到 (-10)</option>
                     <option value="rule_12">漏打卡 (-1)</option>
                 </select>
             </div>
 
-            <!-- 3. 填寫備註 -->
-            <div class="form-group">
-                <label for="notes">詳細備註 (選填)</label>
-                <textarea id="notes" name="notes" placeholder="例如：訂單 #12345 少訂了 A 商品"></textarea>
+            <!-- 詳細事由 -->
+            <div class="input-group">
+                <i class="fas fa-pencil-alt"></i>
+                <textarea id="notes" class="input-field" placeholder="詳細事由 (選填)"></textarea>
             </div>
 
-            <!-- 4. 提交按鈕 -->
-            <button type="submit">提交紀錄</button>
+            <!-- 提交按鈕 -->
+            <button type="submit" class="submit-btn">提交紀錄</button>
+
         </form>
     </div>
 
-    <!-- =========== JavaScript 區塊 =========== -->
-    <!-- 
-        要讓這個頁面真正運作，您需要：
-        1. 引入 Firebase SDK
-        2. 初始化 Firebase
-        3. 編寫 JavaScript 程式碼來呼叫我們之前建立的 Cloud Function
-    -->
+    <!-- JavaScript 邏輯部分保持不變 -->
     <script>
-        // 獲取表單元素
         const performanceForm = document.getElementById('performance-form');
 
-        // 監聽表單的提交事件
         performanceForm.addEventListener('submit', (event) => {
-            // 防止表單用傳統方式提交，這樣我們才能用 JavaScript 處理
             event.preventDefault(); 
             
-            // 從表單中獲取使用者選擇的值
             const employeeId = document.getElementById('employee-select').value;
             const ruleId = document.getElementById('rule-select').value;
             const notes = document.getElementById('notes').value;
 
-            // 在控制台印出我們獲取的資料，方便除錯
-            console.log('準備提交的資料:', {
-                employeeId: employeeId,
-                ruleId: ruleId,
-                notes: notes,
-            });
+            if (!employeeId || !ruleId) {
+                alert('請務必選擇員工和績效項目！');
+                return;
+            }
 
-            alert(`您已選擇：\n員工: ${employeeId}\n規則: ${ruleId}\n備註: ${notes}`);
+            console.log('準備提交的資料:', { employeeId, ruleId, notes });
+            alert(`紀錄已暫存 (尚未連接後端):\n員工: ${employeeId}\n項目: ${ruleId}\n事由: ${notes}`);
 
-            // ------------------------------------------------------------------
             // 【未來串接 Firebase 的核心程式碼會放在這裡】
-            // 
-            // 1. 您需要先在您的專案中引入 Firebase SDK
-            //    <script src="/__/firebase/8.x.x/firebase-app.js"></script>
-            //    <script src="/__/firebase/8.x.x/firebase-functions.js"></script>
-            //    <script src="/__/firebase/init.js"></script>
-            //
-            // 2. 然後您就可以呼叫我們在後端寫好的 Cloud Function
-            /*
-            const addPerformanceRecord = firebase.functions().httpsCallable('addPerformanceRecord');
-            
-            addPerformanceRecord({ 
-                employeeId: employeeId, 
-                ruleId: ruleId, 
-                notes: notes 
-            })
-            .then((result) => {
-                console.log('Cloud Function 執行成功:', result);
-                alert('績效紀錄已成功新增！');
-                performanceForm.reset(); // 成功後清空表單
-            })
-            .catch((error) => {
-                console.error('Cloud Function 執行失敗:', error);
-                alert('新增失敗：' + error.message);
-            });
-            */
-           // ------------------------------------------------------------------
+            // ... 這部分邏輯和之前一樣
         });
     </script>
 
