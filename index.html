@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>門市績效管理系統 v3.0</title>
+    <title>門市績效管理系統 v3.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
@@ -86,4 +86,301 @@
             <!-- 新增績效紀錄 -->
             <div class="admin-box">
                 <h3><i class="fas fa-plus"></i> 新增紀錄</h3>
+                <form id="add-record-form">
+                    <select id="sel-employee" class="input-field no-icon" style="margin-bottom: 8px;" required></select>
+                    <select id="sel-rule" class="input-field no-icon" style="margin-bottom: 8px;" required></select>
+                    <input type="date" id="rec-date" class="input-field no-icon" style="margin-bottom: 8px;" required>
+                    <textarea id="rec-notes" class="input-field no-icon" placeholder="備註事由 (選填)" style="margin-bottom: 8px; height: 50px;"></textarea>
+                    <button type="submit" class="submit-btn btn-orange">儲存紀錄</button>
+                </form>
+            </div>
+
+            <!-- 員工帳號管理 -->
+            <div class="admin-box">
+                <h3><i class="fas fa-users-cog"></i> 員工管理</h3>
+                <div style="max-height: 180px; overflow-y: auto;">
+                    <table>
+                        <thead><tr><th>姓名</th><th>密碼</th><th>刪除</th></tr></thead>
+                        <tbody id="emp-body"></tbody>
+                    </table>
+                </div>
+                <div style="display: flex; gap: 5px; margin-top: 10px;">
+                    <input type="text" id="new-emp-name" placeholder="姓名" style="flex:2; padding: 6px;">
+                    <input type="text" id="new-emp-pass" placeholder="生日" style="flex:1; padding: 6px;">
+                    <button class="btn-green" onclick="addEmployee()" style="border:none; color:#fff; padding:0 8px; border-radius:4px;">新增</button>
+                </div>
+            </div>
+
+            <!-- 項目管理 -->
+            <div class="admin-box">
+                <h3><i class="fas fa-tasks"></i> 項目管理</h3>
+                <div style="max-height: 180px; overflow-y: auto;">
+                    <table>
+                        <thead><tr><th>項目</th><th>分數</th><th>刪除</th></tr></thead>
+                        <tbody id="rule-body"></tbody>
+                    </table>
+                </div>
+                <div style="display: flex; gap: 5px; margin-top: 10px;">
+                    <input type="text" id="new-rule-name" placeholder="名稱" style="flex:2; padding: 6px;">
+                    <input type="number" id="new-rule-pts" placeholder="-1" style="flex:1; padding: 6px;">
+                    <button class="btn-green" onclick="addRule()" style="border:none; color:#fff; padding:0 8px; border-radius:4px;">新增</button>
+                </div>
+            </div>
+
+            <!-- 歷史紀錄總表 (含篩選功能) -->
+            <div class="admin-box full-width">
+                <h3>
+                    <span><i class="fas fa-history"></i> 績效歷史與篩選</span>
+                </h3>
+                
+                <!-- 篩選欄 -->
+                <div class="filter-bar">
+                    <i class="fas fa-filter" style="color:#2980B9"></i>
+                    <span>員工：</span>
+                    <select id="filter-emp" class="filter-select" onchange="updateHistoryUI()">
+                        <option value="all">全部員工</option>
+                    </select>
+                    <span>月份：</span>
+                    <select id="filter-month" class="filter-select" onchange="updateHistoryUI()">
+                        <option value="all">全部月份</option>
+                    </select>
+                    <button class="btn-small" style="background:#888" onclick="resetFilters()">重置篩選</button>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>日期</th><th>姓名</th><th>項目</th><th>分數</th><th>備註</th><th>操作</th></tr></thead>
+                        <tbody id="history-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. 員工看版 -->
+    <section id="employee-section">
+        <div class="employee-header">
+            <h2 id="emp-welcome-name">姓名</h2>
+            <p>月績效個人看板</p>
+            <button class="btn-red btn-small" onclick="logout()" style="margin-top: 10px;">登出系統</button>
+        </div>
+        <div class="score-card">
+            <p style="color: #666;">本月目前得分</p>
+            <div class="score-num" id="emp-score">100</div>
+            <p style="color: #999; font-size: 13px;">(基礎分數: 100)</p>
+        </div>
+        <h3 style="color: #fff; margin-bottom: 10px;"><i class="fas fa-list"></i> 扣分紀錄</h3>
+        <div id="emp-record-list"></div>
+    </section>
+
+    <script>
+        // --- 初始資料 ---
+        let employees = [
+            { id: 'e1', name: '陳千慧', password: '1005' },
+            { id: 'e2', name: '王大明', password: '1111' }
+        ];
+        let rules = [
+            { id: 'r1', name: '補單失誤', pts: -1 },
+            { id: 'r2', name: '下單失誤', pts: -5 },
+            { id: 'r3', name: '遲到', pts: -10 }
+        ];
+        let records = [
+            { id: Date.now(), date: '2026-03-10', empId: 'e1', empName: '陳千慧', ruleName: '遲到', pts: -10, notes: '開會遲到' }
+        ];
+
+        // --- 登入控制 (已加入防呆機制) ---
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // .trim() 會自動把使用者不小心按到的空白鍵刪掉
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+
+            // .toLowerCase() 會把 Admin、ADMIN 都當成 admin
+            if (user.toLowerCase() === 'admin' && pass === '671213') {
+                showSection('admin-section');
+                initAdmin();
+            } else {
+                // 檢查員工資料
+                const emp = employees.find(item => item.name === user && item.password === pass);
+                if (emp) {
+                    showSection('employee-section');
+                    initEmployee(emp);
+                } else {
+                    alert('帳號或密碼錯誤！\n請檢查是否打錯字。');
+                }
+            }
+        });
+
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+            const target = document.getElementById(id);
+            if(id === 'login-section') target.style.display = 'flex';
+            else target.style.display = 'block';
+        }
+
+        // --- 管理者功能 ---
+        function initAdmin() {
+            updateEmployeeUI();
+            updateRuleUI();
+            updateFilterOptions(); 
+            updateHistoryUI();
+            document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
+        }
+
+        // 1. 員工與項目管理
+        function updateEmployeeUI() {
+            document.getElementById('emp-body').innerHTML = employees.map(e => `
+                <tr><td>${e.name}</td><td>${e.password}</td><td><button class="btn-red btn-small" onclick="delEmployee('${e.id}')">刪</button></td></tr>
+            `).join('');
+            document.getElementById('sel-employee').innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            updateFilterOptions();
+        }
+
+        function addEmployee() {
+            const name = document.getElementById('new-emp-name').value.trim();
+            const pass = document.getElementById('new-emp-pass').value.trim();
+            if(!name || !pass) return alert('請填寫完整');
+            employees.push({ id: 'e' + Date.now(), name, password: pass });
+            updateEmployeeUI();
+            document.getElementById('new-emp-name').value = '';
+            document.getElementById('new-emp-pass').value = '';
+        }
+
+        function delEmployee(id) {
+            if(confirm('刪除後該員工將無法登入，確定嗎？')) {
+                employees = employees.filter(e => e.id !== id);
+                updateEmployeeUI();
+            }
+        }
+
+        function updateRuleUI() {
+            document.getElementById('rule-body').innerHTML = rules.map(r => `
+                <tr><td>${r.name}</td><td>${r.pts}</td><td><button class="btn-red btn-small" onclick="delRule('${r.id}')">刪</button></td></tr>
+            `).join('');
+            document.getElementById('sel-rule').innerHTML = rules.map(r => `<option value="${r.id}">${r.name} (${r.pts})</option>`).join('');
+        }
+
+        function addRule() {
+            const name = document.getElementById('new-rule-name').value.trim();
+            const pts = parseInt(document.getElementById('new-rule-pts').value);
+            if(!name || isNaN(pts)) return alert('請輸入項目與分數');
+            rules.push({ id: 'r' + Date.now(), name, pts });
+            updateRuleUI();
+            document.getElementById('new-rule-name').value = '';
+            document.getElementById('new-rule-pts').value = '';
+        }
+
+        function delRule(id) {
+            rules = rules.filter(r => r.id !== id);
+            updateRuleUI();
+        }
+
+        // 2. 歷史紀錄與篩選邏輯
+        function updateFilterOptions() {
+            const empFilter = document.getElementById('filter-emp');
+            const currentEmp = empFilter.value;
+            empFilter.innerHTML = '<option value="all">全部員工</option>' + 
+                employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            empFilter.value = currentEmp || 'all';
+
+            const monthFilter = document.getElementById('filter-month');
+            const currentMonth = monthFilter.value;
+            const availableMonths = [...new Set(records.map(r => r.date.substring(0, 7)))].sort().reverse();
             
+            monthFilter.innerHTML = '<option value="all">全部月份</option>' + 
+                availableMonths.map(m => {
+                    const [y, mm] = m.split('-');
+                    return `<option value="${m}">${y}年 ${parseInt(mm)}月</option>`;
+                }).join('');
+            monthFilter.value = currentMonth || 'all';
+        }
+
+        function updateHistoryUI() {
+            const empFilter = document.getElementById('filter-emp').value;
+            const monthFilter = document.getElementById('filter-month').value;
+            
+            const filteredRecords = records.filter(r => {
+                const matchEmp = (empFilter === 'all' || r.empId === empFilter);
+                const matchMonth = (monthFilter === 'all' || r.date.startsWith(monthFilter));
+                return matchEmp && matchMonth;
+            });
+
+            document.getElementById('history-body').innerHTML = filteredRecords.map(r => `
+                <tr>
+                    <td>${r.date}</td>
+                    <td>${r.empName}</td>
+                    <td>${r.ruleName}</td>
+                    <td style="color:#e74c3c; font-weight:bold;">${r.pts}</td>
+                    <td>${r.notes || ''}</td>
+                    <td><button class="btn-red btn-small" onclick="delRecord(${r.id})">刪除</button></td>
+                </tr>
+            `).reverse().join('');
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-emp').value = 'all';
+            document.getElementById('filter-month').value = 'all';
+            updateHistoryUI();
+        }
+
+        // 新增紀錄
+        document.getElementById('add-record-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const empId = document.getElementById('sel-employee').value;
+            const ruleId = document.getElementById('sel-rule').value;
+            const date = document.getElementById('rec-date').value;
+            const notes = document.getElementById('rec-notes').value.trim();
+
+            const emp = employees.find(e => e.id === empId);
+            const rule = rules.find(r => r.id === ruleId);
+
+            records.push({ id: Date.now(), date, empId, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes });
+            alert('儲存成功！');
+            updateFilterOptions();
+            updateHistoryUI();
+            document.getElementById('rec-notes').value = '';
+        });
+
+        function delRecord(id) {
+            if(confirm('確定要刪除這筆紀錄嗎？')) {
+                records = records.filter(r => r.id !== id);
+                updateHistoryUI();
+                updateFilterOptions();
+            }
+        }
+
+        // --- 員工端功能 ---
+        function initEmployee(emp) {
+            document.getElementById('emp-welcome-name').textContent = emp.name;
+            const list = document.getElementById('emp-record-list');
+            
+            // 員工預設只看「當月」
+            const currentMonthStr = new Date().toISOString().substring(0, 7);
+            const empRecords = records.filter(r => r.empId === emp.id && r.date.startsWith(currentMonthStr));
+            
+            let score = 100;
+            list.innerHTML = empRecords.map(r => {
+                score += r.pts;
+                return `
+                    <div class="record-item">
+                        <div style="text-align:left;">
+                            <div style="font-weight:700; color:#333;">${r.ruleName}</div>
+                            <div style="font-size:12px; color:#888;">${r.date}</div>
+                            <div style="font-size:13px; color:#555; margin-top:3px;">${r.notes || '無備註'}</div>
+                        </div>
+                        <div style="font-size:22px; font-weight:700; color:#e74c3c;">${r.pts}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            if(empRecords.length === 0) list.innerHTML = '<p style="color:#fff; text-align:center; opacity:0.8;">本月表現完美，暫無扣分！</p>';
+            document.getElementById('emp-score').textContent = score;
+        }
+
+        function logout() {
+            showSection('login-section');
+            document.getElementById('login-form').reset();
+        }
+    </script>
+</body>
+</html>
