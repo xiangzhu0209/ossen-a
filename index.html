@@ -64,6 +64,9 @@
             background-color: #f9f9f9;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
+        .input-field.no-icon { /* 沒有圖示的輸入框 */
+            padding-left: 15px;
+        }
         .input-field:focus {
             outline: none;
             border-color: #2980B9;
@@ -105,6 +108,18 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
+        .btn-red {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        .btn-red:hover {
+             background: linear-gradient(135deg, #c0392b, #e74c3c);
+        }
+        .btn-green {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+        .btn-green:hover {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
 
         /* ----------------------- 登入頁面特定樣式 ----------------------- */
         #login-section {
@@ -121,22 +136,28 @@
         #admin-section {
             padding: 20px;
             display: none; /* 預設隱藏 */
+            min-height: 100vh;
         }
         .admin-header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
             color: #fff;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .admin-header h1 {
             font-size: 36px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 0;
             color: #fff;
         }
-        .admin-header button {
-            background-color: #f44336;
-            padding: 8px 15px;
-            border-radius: 5px;
+        .admin-header .submit-btn {
+            width: auto;
+            padding: 10px 20px;
+            margin-top: 0;
             font-size: 16px;
         }
         .dashboard-container {
@@ -177,6 +198,7 @@
             padding: 12px 15px;
             text-align: left;
             font-size: 15px;
+            vertical-align: middle;
         }
         .records-table thead {
             background-color: #f7f9fc;
@@ -189,16 +211,71 @@
         .records-table tbody tr:hover {
             background-color: #eef2f8;
         }
+        /* 績效項目管理 */
+        .rule-list {
+            list-style: none;
+            padding: 0;
+        }
+        .rule-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .rule-item:last-child {
+            border-bottom: none;
+        }
+        .rule-item-info {
+            flex-grow: 1;
+        }
+        .rule-item-actions button {
+            width: auto;
+            padding: 5px 10px;
+            margin-left: 5px;
+            font-size: 14px;
+            border-radius: 5px;
+            margin-top: 0;
+        }
+        .rule-item-actions .edit-btn { background: #ffc107; }
+        .rule-item-actions .edit-btn:hover { background: #e0a800; }
+        .rule-item-actions .delete-btn { background: #dc3545; }
+        .rule-item-actions .delete-btn:hover { background: #c82333; }
+        .add-rule-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .add-rule-form input[type="text"], .add-rule-form input[type="number"] {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            padding-left: 10px; /* 移除圖示的空間 */
+        }
+        .add-rule-form button {
+            width: auto;
+            padding: 10px 15px;
+            font-size: 14px;
+            margin-top: 0;
+        }
 
         /* ----------------------- 員工績效查看樣式 (手機版) ----------------------- */
         #employee-section {
             padding: 15px;
             display: none; /* 預設隱藏 */
+            min-height: 100vh;
         }
         .employee-header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
             color: #fff;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .employee-header h1 {
             margin: 0;
@@ -211,10 +288,10 @@
             font-size: 16px;
             color: #eee;
         }
-         .employee-header button {
-            background-color: #f44336;
-            padding: 8px 15px;
-            border-radius: 5px;
+        .employee-header .submit-btn {
+            width: auto;
+            padding: 10px 20px;
+            margin-top: 0;
             font-size: 16px;
         }
 
@@ -226,6 +303,9 @@
             text-align: center;
             margin-bottom: 20px;
             box-shadow: 0 8px 15px rgba(41, 128, 185, 0.3);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .summary-card .score-label { font-size: 18px; opacity: 0.9; }
         .summary-card .score { font-size: 48px; font-weight: 700; margin: 5px 0; }
@@ -238,6 +318,14 @@
             border-left: 4px solid #fff;
             padding-left: 10px;
             text-align: left;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .record-list {
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .record-list .record-item {
             background: #fff;
@@ -262,12 +350,20 @@
                 min-width: unset;
                 width: 100%;
             }
-            #admin-section .card, #employee-section .card {
+            .admin-panel, .card {
                 padding: 25px;
             }
-            .admin-header h1 { font-size: 28px; }
-            .employee-header h1 { font-size: 24px; }
+            .admin-header h1, .employee-header h1 { font-size: 28px; }
             .employee-panel h2 { font-size: 18px; }
+            .add-rule-form {
+                flex-direction: column;
+            }
+            .add-rule-form input {
+                width: 100%;
+            }
+            .add-rule-form button {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -295,41 +391,30 @@
     <section id="admin-section" style="display: none;">
         <div class="admin-header">
             <h1>管理者儀表板</h1>
-            <button class="submit-btn" onclick="logout()">登出</button>
+            <button class="submit-btn btn-red" onclick="logout()">登出</button>
         </div>
         <div class="dashboard-container">
-            <!-- 左側：新增紀錄表單 -->
+            <!-- 左側：新增績效紀錄表單 -->
             <div class="admin-panel form-panel">
                 <h2><i class="fas fa-plus-circle"></i> 新增績效紀錄</h2>
                 <form id="add-record-form">
                     <div class="input-group select-wrapper">
                         <i class="fas fa-user-plus"></i>
-                        <select id="admin-employee-select" class="input-field">
+                        <select id="admin-employee-select" class="input-field" required>
                             <option value="" disabled selected>請選擇員工</option>
-                            <option value="陳千慧">陳千慧</option>
-                            <option value="王大明">王大明</option>
-                            <option value="林志強">林志強</option>
+                            <!-- 員工選項會由 JS 動態載入 -->
                         </select>
                     </div>
                     <div class="input-group select-wrapper">
                         <i class="fas fa-list-check"></i>
-                        <select id="admin-rule-select" class="input-field">
+                        <select id="admin-rule-select" class="input-field" required>
                             <option value="" disabled selected>請選擇績效項目</option>
-                            <!-- 這裡的選項會與後端規則一致 -->
-                            <option value="rule_01">補單失誤/遺漏 (-1)</option>
-                            <option value="rule_02a">下單失誤 (可換救) (-2)</option>
-                            <option value="rule_02b">下單失誤 (不可換救) (-5)</option>
-                            <option value="rule_03">點貨失誤 (-2)</option>
-                            <option value="rule_04">排程失誤/遺漏 (-3)</option>
-                            <option value="rule_05">交辦事項遺漏 (-2)</option>
-                            <option value="rule_06">貨區管理不良 (-1)</option>
-                            <option value="rule_07">庫存管理不良 (-1)</option>
-                            <option value="rule_08">交辦事項處理不良 (-1)</option>
-                            <option value="rule_09">接待客戶報價失誤 (-3)</option>
-                            <option value="rule_10">接待客戶介紹失誤 (-3)</option>
-                            <option value="rule_11">遲到 (-10)</option>
-                            <option value="rule_12">漏打卡 (-1)</option>
+                            <!-- 績效規則選項會由 JS 動態載入 -->
                         </select>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input type="date" id="record-date" class="input-field no-icon" required>
                     </div>
                     <div class="input-group">
                         <i class="fas fa-pencil-alt"></i>
@@ -339,7 +424,7 @@
                 </form>
             </div>
 
-            <!-- 右側：績效總表 -->
+            <!-- 右側：績效總表 & 績效項目管理 -->
             <div class="admin-panel table-panel">
                 <h2><i class="fas fa-table"></i> 所有績效紀錄</h2>
                 <table class="records-table">
@@ -352,14 +437,24 @@
                             <th>詳細事由</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="all-performance-records">
                         <!-- 這裡是範例資料，未來會從資料庫動態載入 -->
                         <tr><td>2026-03-10</td><td>陳千慧</td><td>遲到</td><td>-10</td><td>早上會議遲到15分鐘</td></tr>
                         <tr><td>2026-03-08</td><td>王大明</td><td>漏打卡</td><td>-1</td><td>下班忘記打卡</td></tr>
-                        <tr><td>2026-03-05</td><td>陳千慧</td><td>補單失誤</td><td>-1</td><td>訂單#5568 補單錯誤</td></tr>
+                        <tr><td>2026-03-05</td><td>陳千慧</td><td>補單失誤/遺漏</td><td>-1</td><td>訂單#5568 補單錯誤</td></tr>
                         <tr><td>2026-03-01</td><td>林志強</td><td>貨區管理不良</td><td>-1</td><td>A區商品堆放凌亂</td></tr>
                     </tbody>
                 </table>
+
+                <h2 style="margin-top: 30px;"><i class="fas fa-cog"></i> 績效項目管理</h2>
+                <ul class="rule-list" id="performance-rule-list">
+                    <!-- 績效項目會由 JS 動態載入 -->
+                </ul>
+                <div class="add-rule-form">
+                    <input type="text" id="new-rule-description" placeholder="新項目描述" class="input-field no-icon">
+                    <input type="number" id="new-rule-points" placeholder="扣分 (-5)" class="input-field no-icon">
+                    <button class="submit-btn btn-green" onclick="addRule()">新增項目</button>
+                </div>
             </div>
         </div>
     </section>
@@ -367,16 +462,16 @@
     <!-- 3. 員工績效查看區塊 (預設隱藏) -->
     <section id="employee-section" style="display: none;">
         <div class="employee-header">
-            <h1 id="employee-name-display">陳千慧</h1>
+            <h1 id="employee-name-display"></h1>
             <p><span id="employee-month-display">2026年 3月</span> 績效報告</p>
-            <button class="submit-btn" onclick="logout()">登出</button>
+            <button class="submit-btn btn-red" onclick="logout()">登出</button>
         </div>
 
         <div class="employee-panel">
             <!-- 當月總分卡片 -->
             <div class="summary-card">
                 <div class="score-label">本月績效總分</div>
-                <div class="score" id="employee-total-score">89</div>
+                <div class="score" id="employee-total-score"></div>
                 <div class="score-base">起始分數: 100</div>
             </div>
 
@@ -384,101 +479,150 @@
             <h2><i class="fas fa-list-ul"></i> 扣分明細</h2>
             <div class="record-list" id="employee-record-list">
                 <!-- 這裡是範例資料，未來會從資料庫動態載入 -->
-                <div class="record-item">
-                    <div class="info">
-                        <div class="reason">遲到</div>
-                        <div class="date">2026-03-10</div>
-                        <div class="notes">早上會議遲到15分鐘</div>
-                    </div>
-                    <div class="points">-10</div>
-                </div>
-                <div class="record-item">
-                    <div class="info">
-                        <div class="reason">補單失誤</div>
-                        <div class="date">2026-03-05</div>
-                        <div class="notes">訂單#5568 補單錯誤</div>
-                    </div>
-                    <div class="points">-1</div>
-                </div>
             </div>
         </div>
     </section>
 
     <script>
+        // --- 模擬資料庫數據 (未來會替換為 Firebase Firestore) ---
+        let employees = [
+            { id: 'emp_01', name: '陳千慧', password: '1005' },
+            { id: 'emp_02', name: '王大明', password: '1111' }, // 範例員工
+            { id: 'emp_03', name: '林志強', password: '2222' }  // 範例員工
+        ];
+
+        // 績效規則，帶有唯一的 ID，用於編輯和刪除
+        let performanceRules = [
+            { id: 'rule_01', description: '補單失誤/遺漏', points: -1 },
+            { id: 'rule_02a', description: '下單失誤 (可換救)', points: -2 },
+            { id: 'rule_02b', description: '下單失誤 (不可換救)', points: -5 },
+            { id: 'rule_03', description: '點貨失誤', points: -2 },
+            { id: 'rule_04', description: '排程失誤/遺漏', points: -3 },
+            { id: 'rule_05', description: '交辦事項遺漏', points: -2 },
+            { id: 'rule_06', description: '貨區管理不良', points: -1 },
+            { id: 'rule_07', description: '庫存管理不良', points: -1 },
+            { id: 'rule_08', description: '交辦事項處理不良', points: -1 },
+            { id: 'rule_09', description: '接待客戶報價失誤', points: -3 },
+            { id: 'rule_10', description: '接待客戶介紹失誤', points: -3 },
+            { id: 'rule_11', description: '遲到', points: -10 },
+            { id: 'rule_12', description: '漏打卡', points: -1 }
+        ];
+
+        // 模擬績效紀錄，包含日期
+        let performanceRecords = [
+            { employeeId: 'emp_01', employeeName: '陳千慧', ruleId: 'rule_11', ruleDescription: '遲到', points: -10, notes: '早上會議遲到15分鐘', date: '2026-03-10' },
+            { employeeId: 'emp_02', employeeName: '王大明', ruleId: 'rule_12', ruleDescription: '漏打卡', points: -1, notes: '下班忘記打卡', date: '2026-03-08' },
+            { employeeId: 'emp_01', employeeName: '陳千慧', ruleId: 'rule_01', ruleDescription: '補單失誤/遺漏', points: -1, notes: '訂單#5568 補單錯誤', date: '2026-03-05' },
+            { employeeId: 'emp_03', employeeName: '林志強', ruleId: 'rule_06', ruleDescription: '貨區管理不良', points: -1, notes: 'A區商品堆放凌亂', date: '2026-03-01' },
+        ];
+
+
         // 獲取所有主要區塊
         const loginSection = document.getElementById('login-section');
         const adminSection = document.getElementById('admin-section');
         const employeeSection = document.getElementById('employee-section');
 
-        // 登入表單提交事件
-        document.getElementById('login-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        const adminEmployeeSelect = document.getElementById('admin-employee-select');
+        const adminRuleSelect = document.getElementById('admin-rule-select');
+        const performanceRuleList = document.getElementById('performance-rule-list');
+        const allPerformanceRecordsTable = document.getElementById('all-performance-records');
+        const employeeRecordList = document.getElementById('employee-record-list');
+        const employeeTotalScore = document.getElementById('employee-total-score');
+        const employeeMonthDisplay = document.getElementById('employee-month-display');
+        const recordDateInput = document.getElementById('record-date');
 
-            // --- 登入邏輯判斷 ---
-            // 實際應用中，這部分應由後端處理以確保安全
-            
-            // 管理者登入
-            if (username.toLowerCase() === 'admin' && password === '671213') {
-                alert('管理者登入成功！');
-                loginSection.style.display = 'none'; // 隱藏登入區塊
-                adminSection.style.display = 'block'; // 顯示管理者區塊
-                // 這裡可以呼叫函數來載入管理者數據
-                // loadAdminData();
-            } 
-            // 員工 陳千慧 登入
-            else if (username === '陳千慧' && password === '1005') {
-                alert('陳千慧，您好！');
-                loginSection.style.display = 'none'; // 隱藏登入區塊
-                employeeSection.style.display = 'block'; // 顯示員工區塊
-                document.getElementById('employee-name-display').textContent = '陳千慧'; // 更新員工姓名
-                // 這裡可以呼叫函數來載入陳千慧的數據
-                // loadEmployeeData('陳千慧');
-            } 
-            // 登入失敗
-            else {
-                alert('帳號或密碼錯誤！');
-            }
-        });
 
-        // 管理者新增紀錄表單提交事件
-        document.getElementById('add-record-form').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const employeeId = document.getElementById('admin-employee-select').value;
-            const ruleId = document.getElementById('admin-rule-select').value;
-            const notes = document.getElementById('admin-notes').value;
+        // --- 輔助函數：載入員工和績效規則到下拉選單和管理列表 ---
+        function loadAdminData() {
+            // 載入員工到新增紀錄下拉選單
+            adminEmployeeSelect.innerHTML = '<option value="" disabled selected>請選擇員工</option>';
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = emp.name;
+                adminEmployeeSelect.appendChild(option);
+            });
 
-            if (!employeeId || !ruleId) {
-                alert('請務必選擇員工和績效項目！');
-                return;
-            }
+            // 載入績效規則到新增紀錄下拉選單和管理列表
+            loadPerformanceRules();
 
-            console.log('準備提交的資料:', { employeeId, ruleId, notes });
-            alert(`紀錄已暫存 (尚未連接後端):\n員工: ${employeeId}\n項目: ${ruleId}\n事由: ${notes}`);
+            // 載入所有績效紀錄到表格
+            displayAllPerformanceRecords();
 
-            // --- 未來串接 Firebase Cloud Function 的程式碼會放在這裡 ---
-            // 這裡將呼叫前面提供的 Firebase Cloud Function (addPerformanceRecord)
-            // 呼叫成功後，可能需要重新載入 adminSection 中的表格數據
-        });
-
-        // 登出功能
-        function logout() {
-            alert('您已登出。');
-            loginSection.style.display = 'flex'; // 顯示登入區塊 (使用flex居中)
-            adminSection.style.display = 'none'; // 隱藏管理者區塊
-            employeeSection.style.display = 'none'; // 隱藏員工區塊
-            document.getElementById('login-form').reset(); // 清空登入表單
+            // 設定預設日期為今天
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            recordDateInput.value = `${year}-${month}-${day}`;
         }
 
-        // 頁面載入時，確保只有登入區塊可見 (防止重新整理後停留在其他頁面)
-        document.addEventListener('DOMContentLoaded', () => {
-            loginSection.style.display = 'flex';
-            adminSection.style.display = 'none';
-            employeeSection.style.display = 'none';
-        });
+        function loadPerformanceRules() {
+            adminRuleSelect.innerHTML = '<option value="" disabled selected>請選擇績效項目</option>';
+            performanceRuleList.innerHTML = ''; // 清空管理列表
 
-    </script>
+            performanceRules.forEach(rule => {
+                // 更新新增紀錄下拉選單
+                const option = document.createElement('option');
+                option.value = rule.id;
+                option.textContent = `${rule.description} (${rule.points})`;
+                adminRuleSelect.appendChild(option);
 
-</body>
-</html>
+                // 更新管理列表
+                const li = document.createElement('li');
+                li.className = 'rule-item';
+                li.innerHTML = `
+                    <div class="rule-item-info">${rule.description} (${rule.points})</div>
+                    <div class="rule-item-actions">
+                        <button class="submit-btn edit-btn" onclick="editRule('${rule.id}')">編輯</button>
+                        <button class="submit-btn delete-btn" onclick="deleteRule('${rule.id}')">刪除</button>
+                    </div>
+                `;
+                performanceRuleList.appendChild(li);
+            });
+        }
+
+        function displayAllPerformanceRecords() {
+            allPerformanceRecordsTable.innerHTML = ''; // 清空現有紀錄
+            performanceRecords.forEach(record => {
+                const row = allPerformanceRecordsTable.insertRow();
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.employeeName}</td>
+                    <td>${record.ruleDescription}</td>
+                    <td>${record.points}</td>
+                    <td>${record.notes}</td>
+                `;
+            });
+        }
+        
+        function loadEmployeePerformance(employeeId, employeeName) {
+            const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+            let totalScore = 100;
+            employeeRecordList.innerHTML = ''; // 清空現有紀錄
+
+            const filteredRecords = performanceRecords.filter(record => 
+                record.employeeId === employeeId && record.date.startsWith(currentMonth)
+            );
+
+            if (filteredRecords.length === 0) {
+                employeeRecordList.innerHTML = '<p style="text-align: center; color: #fff;">本月暫無扣分紀錄。</p>';
+            } else {
+                filteredRecords.forEach(record => {
+                    totalScore += record.points; // 累計扣分
+                    const div = document.createElement('div');
+                    div.className = 'record-item';
+                    div.innerHTML = `
+                        <div class="info">
+                            <div class="reason">${record.ruleDescription}</div>
+                            <div class="date">${record.date}</div>
+                            <div class="notes">${record.notes}</div>
+                        </div>
+                        <div class="points">${record.points}</div>
+                    `;
+                    employeeRecordList.appendChild(div);
+                });
+            }
+
+            // 更新員工介面顯示
+            document.getElementById('empl
