@@ -4,625 +4,296 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>員工績效管理系統</title>
-    <!-- 引入 Google Fonts 和 Font Awesome 圖示庫 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 引入圖示與字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
-        /* 共用基礎樣式 */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: linear-gradient(135deg, #6DD5FA, #2980B9); /* 漸層背景 */
-            color: #333;
-            line-height: 1.6;
-        }
-        h1, h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .card {
-            background: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            padding: 40px;
-            width: 90%;
-            max-width: 450px;
-            text-align: center;
-            margin: 20px auto; /* 居中 */
-        }
-        .card-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 35px;
-        }
-        .input-group {
-            position: relative;
-            margin-bottom: 25px;
-            text-align: left; /* 讓 label 和 input 靠左 */
-        }
-        .input-group i {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #888;
-            font-size: 16px;
-        }
-        .input-field {
-            width: 100%;
-            padding: 15px 15px 15px 50px; /* 左邊留出空間給圖示 */
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            background-color: #f9f9f9;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        .input-field.no-icon { /* 沒有圖示的輸入框 */
-            padding-left: 15px;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: #2980B9;
-            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
-        }
-        select.input-field {
-            appearance: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-        }
-        .select-wrapper {
-            position: relative;
-        }
-        .select-wrapper::after {
-            content: '\f078';
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #888;
-            pointer-events: none;
-        }
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            background: linear-gradient(135deg, #6DD5FA, #2980B9);
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
-        }
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        }
-        .btn-red {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-        }
-        .btn-red:hover {
-             background: linear-gradient(135deg, #c0392b, #e74c3c);
-        }
-        .btn-green {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-        }
-        .btn-green:hover {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-        }
-
-        /* ----------------------- 登入頁面特定樣式 ----------------------- */
-        #login-section {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        #login-section .card {
-             max-width: 400px;
-        }
+        /* --- 基礎樣式 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: linear-gradient(135deg, #6DD5FA, #2980B9); color: #333; min-height: 100vh; }
         
-        /* ----------------------- 管理者儀表板樣式 (電腦版) ----------------------- */
-        #admin-section {
-            padding: 20px;
-            display: none; /* 預設隱藏 */
-            min-height: 100vh;
-        }
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            color: #fff;
-            max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .admin-header h1 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 0;
-            color: #fff;
-        }
-        .admin-header .submit-btn {
-            width: auto;
-            padding: 10px 20px;
-            margin-top: 0;
-            font-size: 16px;
-        }
-        .dashboard-container {
-            display: flex;
-            gap: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .admin-panel {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-            padding: 30px;
-            flex: 1; /* 均分或按比例分配 */
-        }
-        .form-panel {
-            min-width: 400px;
-            flex: 1;
-        }
-        .table-panel {
-            flex: 2;
-        }
-        .admin-panel h2 {
-            font-size: 24px;
-            margin-bottom: 25px;
-            color: #2980B9;
-            border-left: 5px solid #6DD5FA;
-            padding-left: 10px;
-            text-align: left;
-        }
-        .records-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .records-table th, .records-table td {
-            border: 1px solid #e0e0e0;
-            padding: 12px 15px;
-            text-align: left;
-            font-size: 15px;
-            vertical-align: middle;
-        }
-        .records-table thead {
-            background-color: #f7f9fc;
-            font-weight: 600;
-            color: #555;
-        }
-        .records-table tbody tr:nth-child(odd) {
-            background-color: #fafcff;
-        }
-        .records-table tbody tr:hover {
-            background-color: #eef2f8;
-        }
-        /* 績效項目管理 */
-        .rule-list {
-            list-style: none;
-            padding: 0;
-        }
-        .rule-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px dashed #eee;
-        }
-        .rule-item:last-child {
-            border-bottom: none;
-        }
-        .rule-item-info {
-            flex-grow: 1;
-        }
-        .rule-item-actions button {
-            width: auto;
-            padding: 5px 10px;
-            margin-left: 5px;
-            font-size: 14px;
-            border-radius: 5px;
-            margin-top: 0;
-        }
-        .rule-item-actions .edit-btn { background: #ffc107; }
-        .rule-item-actions .edit-btn:hover { background: #e0a800; }
-        .rule-item-actions .delete-btn { background: #dc3545; }
-        .rule-item-actions .delete-btn:hover { background: #c82333; }
-        .add-rule-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .add-rule-form input[type="text"], .add-rule-form input[type="number"] {
-            flex: 1;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            padding-left: 10px; /* 移除圖示的空間 */
-        }
-        .add-rule-form button {
-            width: auto;
-            padding: 10px 15px;
-            font-size: 14px;
-            margin-top: 0;
-        }
+        /* --- 通用卡片與按鈕 --- */
+        .card { background: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 30px; margin: 20px auto; width: 95%; max-width: 450px; text-align: center; }
+        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888; }
+        .input-field { width: 100%; padding: 12px 12px 12px 45px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .input-field.no-icon { padding-left: 12px; }
+        .submit-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; color: #fff; font-size: 18px; font-weight: 700; cursor: pointer; background: #2980B9; margin-top: 10px; }
+        .submit-btn:hover { opacity: 0.9; }
+        .btn-red { background: #e74c3c; }
+        .btn-green { background: #27ae60; }
+        .btn-small { width: auto; padding: 5px 10px; font-size: 14px; margin: 0 2px; }
 
-        /* ----------------------- 員工績效查看樣式 (手機版) ----------------------- */
-        #employee-section {
-            padding: 15px;
-            display: none; /* 預設隱藏 */
-            min-height: 100vh;
-        }
-        .employee-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            color: #fff;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .employee-header h1 {
-            margin: 0;
-            font-size: 28px;
-            color: #fff;
-            margin-bottom: 5px;
-        }
-        .employee-header p {
-            margin: 5px 0;
-            font-size: 16px;
-            color: #eee;
-        }
-        .employee-header .submit-btn {
-            width: auto;
-            padding: 10px 20px;
-            margin-top: 0;
-            font-size: 16px;
-        }
+        /* --- 區塊切換控制 --- */
+        section { display: none; padding: 20px; } /* 預設所有區塊隱藏 */
+        #login-section { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
 
-        .summary-card {
-            background: linear-gradient(135deg, #6DD5FA, #2980B9);
-            color: white;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 15px rgba(41, 128, 185, 0.3);
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .summary-card .score-label { font-size: 18px; opacity: 0.9; }
-        .summary-card .score { font-size: 48px; font-weight: 700; margin: 5px 0; }
-        .summary-card .score-base { font-size: 14px; opacity: 0.8; }
+        /* --- 管理者後台 (電腦版優先) --- */
+        .admin-container { max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; flex-wrap: wrap; }
+        .admin-box { background: #fff; border-radius: 10px; padding: 20px; flex: 1; min-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; color: #fff; margin-bottom: 20px; max-width: 1200px; margin: 0 auto 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #eee; padding: 10px; text-align: left; font-size: 14px; }
+        th { background: #f8f9fa; }
 
-        .employee-panel h2 {
-            font-size: 20px;
-            color: #fff; /* 讓標題在背景上更明顯 */
-            margin-bottom: 10px;
-            border-left: 4px solid #fff;
-            padding-left: 10px;
-            text-align: left;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .record-list {
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .record-list .record-item {
-            background: #fff;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .record-item .info .reason { font-size: 16px; font-weight: 500; color: #333; }
-        .record-item .info .date, .record-item .info .notes { font-size: 14px; color: #777; margin-top: 4px; }
-        .record-item .points { font-size: 20px; font-weight: 700; color: #e74c3c; }
+        /* --- 員工端 (手機版優先) --- */
+        .employee-header { text-align: center; color: #fff; margin-bottom: 20px; }
+        .score-card { background: #fff; border-radius: 15px; padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .score-num { font-size: 48px; font-weight: 700; color: #2980B9; }
+        .record-item { background: #fff; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .record-info { text-align: left; }
+        .record-date { font-size: 12px; color: #888; }
+        .record-points { font-size: 20px; font-weight: 700; color: #e74c3c; }
 
-        /* 響應式設計：針對小螢幕調整 */
         @media (max-width: 768px) {
-            .dashboard-container {
-                flex-direction: column; /* 管理者儀表板在小螢幕上垂直堆疊 */
-            }
-            .form-panel, .table-panel {
-                min-width: unset;
-                width: 100%;
-            }
-            .admin-panel, .card {
-                padding: 25px;
-            }
-            .admin-header h1, .employee-header h1 { font-size: 28px; }
-            .employee-panel h2 { font-size: 18px; }
-            .add-rule-form {
-                flex-direction: column;
-            }
-            .add-rule-form input {
-                width: 100%;
-            }
-            .add-rule-form button {
-                width: 100%;
-            }
+            .admin-container { flex-direction: column; }
+            .admin-box { min-width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. 登入區塊 (預設顯示) -->
-    <section id="login-section">
+    <!-- 1. 登入頁面 -->
+    <section id="login-section" style="display: flex;">
         <div class="card">
-            <h1 class="card-title">員工績效系統</h1>
+            <h2 style="margin-bottom: 20px;">績效管理系統</h2>
             <form id="login-form">
                 <div class="input-group">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="username" class="input-field" placeholder="請輸入帳號" required>
+                    <input type="text" id="username" class="input-field" placeholder="帳號 (管理員/姓名)" required>
                 </div>
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="password" class="input-field" placeholder="請輸入密碼" required>
+                    <input type="password" id="password" class="input-field" placeholder="密碼" required>
                 </div>
-                <button type="submit" class="submit-btn">登入</button>
+                <button type="submit" class="submit-btn">登入系統</button>
             </form>
         </div>
     </section>
 
-    <!-- 2. 管理者儀表板區塊 (預設隱藏) -->
-    <section id="admin-section" style="display: none;">
+    <!-- 2. 管理者後台 -->
+    <section id="admin-section">
         <div class="admin-header">
-            <h1>管理者儀表板</h1>
-            <button class="submit-btn btn-red" onclick="logout()">登出</button>
+            <h2><i class="fas fa-user-shield"></i> 管理者後台</h2>
+            <button class="submit-btn btn-red btn-small" onclick="logout()">登出</button>
         </div>
-        <div class="dashboard-container">
-            <!-- 左側：新增績效紀錄表單 -->
-            <div class="admin-panel form-panel">
-                <h2><i class="fas fa-plus-circle"></i> 新增績效紀錄</h2>
-                <form id="add-record-form">
-                    <div class="input-group select-wrapper">
-                        <i class="fas fa-user-plus"></i>
-                        <select id="admin-employee-select" class="input-field" required>
-                            <option value="" disabled selected>請選擇員工</option>
-                            <!-- 員工選項會由 JS 動態載入 -->
-                        </select>
-                    </div>
-                    <div class="input-group select-wrapper">
-                        <i class="fas fa-list-check"></i>
-                        <select id="admin-rule-select" class="input-field" required>
-                            <option value="" disabled selected>請選擇績效項目</option>
-                            <!-- 績效規則選項會由 JS 動態載入 -->
-                        </select>
+        <div class="admin-container">
+            <!-- 新增紀錄 -->
+            <div class="admin-box">
+                <h3><i class="fas fa-plus"></i> 新增績效紀錄</h3>
+                <form id="add-record-form" style="margin-top: 15px;">
+                    <div class="input-group">
+                        <select id="sel-employee" class="input-field no-icon" required></select>
                     </div>
                     <div class="input-group">
-                        <i class="fas fa-calendar-alt"></i>
-                        <input type="date" id="record-date" class="input-field no-icon" required>
+                        <select id="sel-rule" class="input-field no-icon" required></select>
                     </div>
                     <div class="input-group">
-                        <i class="fas fa-pencil-alt"></i>
-                        <textarea id="admin-notes" class="input-field" placeholder="詳細事由 (選填)"></textarea>
+                        <input type="date" id="rec-date" class="input-field no-icon" required>
                     </div>
-                    <button type="submit" class="submit-btn">提交紀錄</button>
+                    <div class="input-group">
+                        <textarea id="rec-notes" class="input-field no-icon" placeholder="備註事由"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">儲存紀錄</button>
                 </form>
             </div>
 
-            <!-- 右側：績效總表 & 績效項目管理 -->
-            <div class="admin-panel table-panel">
-                <h2><i class="fas fa-table"></i> 所有績效紀錄</h2>
-                <table class="records-table">
-                    <thead>
-                        <tr>
-                            <th>日期</th>
-                            <th>員工姓名</th>
-                            <th>扣分項目</th>
-                            <th>分數</th>
-                            <th>詳細事由</th>
-                        </tr>
-                    </thead>
-                    <tbody id="all-performance-records">
-                        <!-- 這裡是範例資料，未來會從資料庫動態載入 -->
-                        <tr><td>2026-03-10</td><td>陳千慧</td><td>遲到</td><td>-10</td><td>早上會議遲到15分鐘</td></tr>
-                        <tr><td>2026-03-08</td><td>王大明</td><td>漏打卡</td><td>-1</td><td>下班忘記打卡</td></tr>
-                        <tr><td>2026-03-05</td><td>陳千慧</td><td>補單失誤/遺漏</td><td>-1</td><td>訂單#5568 補單錯誤</td></tr>
-                        <tr><td>2026-03-01</td><td>林志強</td><td>貨區管理不良</td><td>-1</td><td>A區商品堆放凌亂</td></tr>
-                    </tbody>
-                </table>
-
-                <h2 style="margin-top: 30px;"><i class="fas fa-cog"></i> 績效項目管理</h2>
-                <ul class="rule-list" id="performance-rule-list">
-                    <!-- 績效項目會由 JS 動態載入 -->
-                </ul>
-                <div class="add-rule-form">
-                    <input type="text" id="new-rule-description" placeholder="新項目描述" class="input-field no-icon">
-                    <input type="number" id="new-rule-points" placeholder="扣分 (-5)" class="input-field no-icon">
-                    <button class="submit-btn btn-green" onclick="addRule()">新增項目</button>
+            <!-- 項目管理 -->
+            <div class="admin-box">
+                <h3><i class="fas fa-cog"></i> 項目及分數管理</h3>
+                <div id="rule-manager" style="margin-top: 15px;">
+                    <table id="rule-table">
+                        <thead><tr><th>項目名稱</th><th>分數</th><th>操作</th></tr></thead>
+                        <tbody id="rule-body"></tbody>
+                    </table>
+                    <div style="margin-top: 10px; display: flex; gap: 5px;">
+                        <input type="text" id="new-rule-name" placeholder="新項目" style="flex:2; padding: 5px;">
+                        <input type="number" id="new-rule-pts" placeholder="-1" style="flex:1; padding: 5px;">
+                        <button class="btn-green" onclick="addRule()" style="padding: 5px 10px; border:none; color:#fff; border-radius:5px;">新增</button>
+                    </div>
                 </div>
+            </div>
+
+            <!-- 所有紀錄 -->
+            <div class="admin-box" style="flex-basis: 100%;">
+                <h3><i class="fas fa-list"></i> 歷史紀錄總表</h3>
+                <table id="history-table">
+                    <thead><tr><th>日期</th><th>姓名</th><th>項目</th><th>分數</th><th>備註</th></tr></thead>
+                    <tbody id="history-body"></tbody>
+                </table>
             </div>
         </div>
     </section>
 
-    <!-- 3. 員工績效查看區塊 (預設隱藏) -->
-    <section id="employee-section" style="display: none;">
+    <!-- 3. 員工個人頁面 -->
+    <section id="employee-section">
         <div class="employee-header">
-            <h1 id="employee-name-display"></h1>
-            <p><span id="employee-month-display">2026年 3月</span> 績效報告</p>
-            <button class="submit-btn btn-red" onclick="logout()">登出</button>
+            <h2 id="emp-welcome-name">姓名</h2>
+            <p>本月績效報告</p>
+            <button class="submit-btn btn-red btn-small" onclick="logout()" style="margin-top: 10px;">登出系統</button>
         </div>
-
-        <div class="employee-panel">
-            <!-- 當月總分卡片 -->
-            <div class="summary-card">
-                <div class="score-label">本月績效總分</div>
-                <div class="score" id="employee-total-score"></div>
-                <div class="score-base">起始分數: 100</div>
-            </div>
-
-            <!-- 扣分明細 -->
-            <h2><i class="fas fa-list-ul"></i> 扣分明細</h2>
-            <div class="record-list" id="employee-record-list">
-                <!-- 這裡是範例資料，未來會從資料庫動態載入 -->
-            </div>
+        <div class="score-card">
+            <p>當月總分</p>
+            <div class="score-num" id="emp-score">100</div>
+            <p style="color: #888; font-size: 14px;">(起始分數: 100)</p>
         </div>
+        <h3 style="color: #fff; margin-bottom: 10px;">扣分明細</h3>
+        <div id="emp-record-list"></div>
     </section>
 
     <script>
-        // --- 模擬資料庫數據 (未來會替換為 Firebase Firestore) ---
-        let employees = [
-            { id: 'emp_01', name: '陳千慧', password: '1005' },
-            { id: 'emp_02', name: '王大明', password: '1111' }, // 範例員工
-            { id: 'emp_03', name: '林志強', password: '2222' }  // 範例員工
+        // --- 預設資料 ---
+        let employees = [{ id: 'e1', name: '陳千慧', password: '1005' }, { id: 'e2', name: '王大明', password: '1111' }];
+        let rules = [
+            { id: 'r1', name: '遲到', pts: -10 },
+            { id: 'r2', name: '漏打卡', pts: -1 },
+            { id: 'r3', name: '下單失誤(不可救)', pts: -5 }
+        ];
+        let records = [
+            { date: '2026-03-10', empId: 'e1', empName: '陳千慧', ruleName: '遲到', pts: -10, notes: '早上開會遲到' }
         ];
 
-        // 績效規則，帶有唯一的 ID，用於編輯和刪除
-        let performanceRules = [
-            { id: 'rule_01', description: '補單失誤/遺漏', points: -1 },
-            { id: 'rule_02a', description: '下單失誤 (可換救)', points: -2 },
-            { id: 'rule_02b', description: '下單失誤 (不可換救)', points: -5 },
-            { id: 'rule_03', description: '點貨失誤', points: -2 },
-            { id: 'rule_04', description: '排程失誤/遺漏', points: -3 },
-            { id: 'rule_05', description: '交辦事項遺漏', points: -2 },
-            { id: 'rule_06', description: '貨區管理不良', points: -1 },
-            { id: 'rule_07', description: '庫存管理不良', points: -1 },
-            { id: 'rule_08', description: '交辦事項處理不良', points: -1 },
-            { id: 'rule_09', description: '接待客戶報價失誤', points: -3 },
-            { id: 'rule_10', description: '接待客戶介紹失誤', points: -3 },
-            { id: 'rule_11', description: '遲到', points: -10 },
-            { id: 'rule_12', description: '漏打卡', points: -1 }
-        ];
+        // --- 登入控制 ---
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
 
-        // 模擬績效紀錄，包含日期
-        let performanceRecords = [
-            { employeeId: 'emp_01', employeeName: '陳千慧', ruleId: 'rule_11', ruleDescription: '遲到', points: -10, notes: '早上會議遲到15分鐘', date: '2026-03-10' },
-            { employeeId: 'emp_02', employeeName: '王大明', ruleId: 'rule_12', ruleDescription: '漏打卡', points: -1, notes: '下班忘記打卡', date: '2026-03-08' },
-            { employeeId: 'emp_01', employeeName: '陳千慧', ruleId: 'rule_01', ruleDescription: '補單失誤/遺漏', points: -1, notes: '訂單#5568 補單錯誤', date: '2026-03-05' },
-            { employeeId: 'emp_03', employeeName: '林志強', ruleId: 'rule_06', ruleDescription: '貨區管理不良', points: -1, notes: 'A區商品堆放凌亂', date: '2026-03-01' },
-        ];
+            // 1. 管理者登入
+            if (user.toLowerCase() === 'admin' && pass === '671213') {
+                showSection('admin-section');
+                initAdmin();
+            } 
+            // 2. 員工登入
+            else {
+                const emp = employees.find(item => item.name === user && item.password === pass);
+                if (emp) {
+                    showSection('employee-section');
+                    initEmployee(emp);
+                } else {
+                    alert('帳號或密碼錯誤！');
+                }
+            }
+        });
 
-
-        // 獲取所有主要區塊
-        const loginSection = document.getElementById('login-section');
-        const adminSection = document.getElementById('admin-section');
-        const employeeSection = document.getElementById('employee-section');
-
-        const adminEmployeeSelect = document.getElementById('admin-employee-select');
-        const adminRuleSelect = document.getElementById('admin-rule-select');
-        const performanceRuleList = document.getElementById('performance-rule-list');
-        const allPerformanceRecordsTable = document.getElementById('all-performance-records');
-        const employeeRecordList = document.getElementById('employee-record-list');
-        const employeeTotalScore = document.getElementById('employee-total-score');
-        const employeeMonthDisplay = document.getElementById('employee-month-display');
-        const recordDateInput = document.getElementById('record-date');
-
-
-        // --- 輔助函數：載入員工和績效規則到下拉選單和管理列表 ---
-        function loadAdminData() {
-            // 載入員工到新增紀錄下拉選單
-            adminEmployeeSelect.innerHTML = '<option value="" disabled selected>請選擇員工</option>';
-            employees.forEach(emp => {
-                const option = document.createElement('option');
-                option.value = emp.id;
-                option.textContent = emp.name;
-                adminEmployeeSelect.appendChild(option);
-            });
-
-            // 載入績效規則到新增紀錄下拉選單和管理列表
-            loadPerformanceRules();
-
-            // 載入所有績效紀錄到表格
-            displayAllPerformanceRecords();
-
-            // 設定預設日期為今天
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = (today.getMonth() + 1).toString().padStart(2, '0');
-            const day = today.getDate().toString().padStart(2, '0');
-            recordDateInput.value = `${year}-${month}-${day}`;
+        function showSection(id) {
+            // 先隱藏所有
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('admin-section').style.display = 'none';
+            document.getElementById('employee-section').style.display = 'none';
+            // 顯示目標
+            const target = document.getElementById(id);
+            if(id === 'login-section') target.style.display = 'flex';
+            else target.style.display = 'block';
         }
 
-        function loadPerformanceRules() {
-            adminRuleSelect.innerHTML = '<option value="" disabled selected>請選擇績效項目</option>';
-            performanceRuleList.innerHTML = ''; // 清空管理列表
+        // --- 管理者功能 ---
+        function initAdmin() {
+            // 載入下拉選單
+            const empSel = document.getElementById('sel-employee');
+            empSel.innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            
+            updateRuleUI();
+            updateHistoryUI();
+            
+            // 設定今天日期
+            document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
+        }
 
-            performanceRules.forEach(rule => {
-                // 更新新增紀錄下拉選單
-                const option = document.createElement('option');
-                option.value = rule.id;
-                option.textContent = `${rule.description} (${rule.points})`;
-                adminRuleSelect.appendChild(option);
+        function updateRuleUI() {
+            const ruleSel = document.getElementById('sel-rule');
+            ruleSel.innerHTML = rules.map(r => `<option value="${r.id}">${r.name} (${r.pts})</option>`).join('');
 
-                // 更新管理列表
-                const li = document.createElement('li');
-                li.className = 'rule-item';
-                li.innerHTML = `
-                    <div class="rule-item-info">${rule.description} (${rule.points})</div>
-                    <div class="rule-item-actions">
-                        <button class="submit-btn edit-btn" onclick="editRule('${rule.id}')">編輯</button>
-                        <button class="submit-btn delete-btn" onclick="deleteRule('${rule.id}')">刪除</button>
+            const ruleBody = document.getElementById('rule-body');
+            ruleBody.innerHTML = rules.map(r => `
+                <tr>
+                    <td>${r.name}</td>
+                    <td>${r.pts}</td>
+                    <td>
+                        <button class="btn-small" onclick="editRule('${r.id}')">改</button>
+                        <button class="btn-small btn-red" onclick="delRule('${r.id}')">刪</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateHistoryUI() {
+            const body = document.getElementById('history-body');
+            body.innerHTML = records.map(r => `
+                <tr><td>${r.date}</td><td>${r.empName}</td><td>${r.ruleName}</td><td>${r.pts}</td><td>${r.notes}</td></tr>
+            `).join('');
+        }
+
+        function addRule() {
+            const name = document.getElementById('new-rule-name').value;
+            const pts = parseInt(document.getElementById('new-rule-pts').value);
+            if(!name || isNaN(pts)) return alert('請輸入完整資訊');
+            rules.push({ id: 'r' + Date.now(), name, pts });
+            updateRuleUI();
+            document.getElementById('new-rule-name').value = '';
+        }
+
+        function delRule(id) {
+            rules = rules.filter(r => r.id !== id);
+            updateRuleUI();
+        }
+
+        function editRule(id) {
+            const r = rules.find(item => item.id === id);
+            const newName = prompt('修改名稱', r.name);
+            const newPts = prompt('修改分數', r.pts);
+            if(newName && newPts) {
+                r.name = newName;
+                r.pts = parseInt(newPts);
+                updateRuleUI();
+            }
+        }
+
+        document.getElementById('add-record-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const empId = document.getElementById('sel-employee').value;
+            const ruleId = document.getElementById('sel-rule').value;
+            const date = document.getElementById('rec-date').value;
+            const notes = document.getElementById('rec-notes').value;
+
+            const emp = employees.find(e => e.id === empId);
+            const rule = rules.find(r => r.id === ruleId);
+
+            records.push({ date, empId, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes });
+            alert('儲存成功！');
+            updateHistoryUI();
+        });
+
+        // --- 員工功能 ---
+        function initEmployee(emp) {
+            document.getElementById('emp-welcome-name').textContent = emp.name;
+            const list = document.getElementById('emp-record-list');
+            const empRecords = records.filter(r => r.empId === emp.id);
+            
+            let score = 100;
+            list.innerHTML = empRecords.map(r => {
+                score += r.pts;
+                return `
+                    <div class="record-item">
+                        <div class="record-info">
+                            <div style="font-weight:700;">${r.ruleName}</div>
+                            <div class="record-date">${r.date}</div>
+                            <div style="font-size:13px; color:#666;">${r.notes}</div>
+                        </div>
+                        <div class="record-points">${r.pts}</div>
                     </div>
                 `;
-                performanceRuleList.appendChild(li);
-            });
+            }).join('');
+            
+            if(empRecords.length === 0) list.innerHTML = '<p style="color:#fff; text-align:center;">本月暫無扣分紀錄</p>';
+            document.getElementById('emp-score').textContent = score;
         }
 
-        function displayAllPerformanceRecords() {
-            allPerformanceRecordsTable.innerHTML = ''; // 清空現有紀錄
-            performanceRecords.forEach(record => {
-                const row = allPerformanceRecordsTable.insertRow();
-                row.innerHTML = `
-                    <td>${record.date}</td>
-                    <td>${record.employeeName}</td>
-                    <td>${record.ruleDescription}</td>
-                    <td>${record.points}</td>
-                    <td>${record.notes}</td>
-                `;
-            });
+        function logout() {
+            showSection('login-section');
+            document.getElementById('login-form').reset();
         }
-        
-        function loadEmployeePerformance(employeeId, employeeName) {
-            const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-            let totalScore = 100;
-            employeeRecordList.innerHTML = ''; // 清空現有紀錄
-
-            const filteredRecords = performanceRecords.filter(record => 
-                record.employeeId === employeeId && record.date.startsWith(currentMonth)
-            );
-
-            if (filteredRecords.length === 0) {
-                employeeRecordList.innerHTML = '<p style="text-align: center; color: #fff;">本月暫無扣分紀錄。</p>';
-            } else {
-                filteredRecords.forEach(record => {
-                    totalScore += record.points; // 累計扣分
-                    const div = document.createElement('div');
-                    div.className = 'record-item';
-                    div.innerHTML = `
-                        <div class="info">
-                            <div class="reason">${record.ruleDescription}</div>
-                            <div class="date">${record.date}</div>
-                            <div class="notes">${record.notes}</div>
-                        </div>
-                        <div class="points">${record.points}</div>
-                    `;
-                    employeeRecordList.appendChild(div);
-                });
-            }
-
-            // 更新員工介面顯示
-            document.getElementById('empl
+    </script>
+</body>
+</html>
