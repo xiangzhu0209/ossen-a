@@ -3,25 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>績效系統登入</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>員工績效管理系統</title>
+    <!-- 引入 Google Fonts 和 Font Awesome 圖示庫 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
+        /* 共用基礎樣式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #6DD5FA, #2980B9);
+            background: linear-gradient(135deg, #6DD5FA, #2980B9); /* 漸層背景 */
+            color: #333;
+            line-height: 1.6;
         }
-        .login-card {
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .card {
             background: #ffffff;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             padding: 40px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
+            margin: 20px auto; /* 居中 */
         }
         .card-title {
             font-size: 28px;
@@ -29,15 +43,50 @@
             margin-bottom: 35px;
         }
         .input-group {
-            margin-bottom: 20px;
-            text-align: left;
+            position: relative;
+            margin-bottom: 25px;
+            text-align: left; /* 讓 label 和 input 靠左 */
+        }
+        .input-group i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 16px;
         }
         .input-field {
             width: 100%;
-            padding: 15px;
+            padding: 15px 15px 15px 50px; /* 左邊留出空間給圖示 */
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #2980B9;
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
+        }
+        select.input-field {
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        .select-wrapper {
+            position: relative;
+        }
+        .select-wrapper::after {
+            content: '\f078';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none;
         }
         .submit-btn {
             width: 100%;
@@ -49,24 +98,319 @@
             font-weight: 700;
             cursor: pointer;
             background: linear-gradient(135deg, #6DD5FA, #2980B9);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ----------------------- 登入頁面特定樣式 ----------------------- */
+        #login-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #login-section .card {
+             max-width: 400px;
+        }
+        
+        /* ----------------------- 管理者儀表板樣式 (電腦版) ----------------------- */
+        #admin-section {
+            padding: 20px;
+            display: none; /* 預設隱藏 */
+        }
+        .admin-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .admin-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        .admin-header button {
+            background-color: #f44336;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .dashboard-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .admin-panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            padding: 30px;
+            flex: 1; /* 均分或按比例分配 */
+        }
+        .form-panel {
+            min-width: 400px;
+            flex: 1;
+        }
+        .table-panel {
+            flex: 2;
+        }
+        .admin-panel h2 {
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: #2980B9;
+            border-left: 5px solid #6DD5FA;
+            padding-left: 10px;
+            text-align: left;
+        }
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .records-table th, .records-table td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 15px;
+        }
+        .records-table thead {
+            background-color: #f7f9fc;
+            font-weight: 600;
+            color: #555;
+        }
+        .records-table tbody tr:nth-child(odd) {
+            background-color: #fafcff;
+        }
+        .records-table tbody tr:hover {
+            background-color: #eef2f8;
+        }
+
+        /* ----------------------- 員工績效查看樣式 (手機版) ----------------------- */
+        #employee-section {
+            padding: 15px;
+            display: none; /* 預設隱藏 */
+        }
+        .employee-header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .employee-header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+        .employee-header p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #eee;
+        }
+         .employee-header button {
+            background-color: #f44336;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #6DD5FA, #2980B9);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 15px rgba(41, 128, 185, 0.3);
+        }
+        .summary-card .score-label { font-size: 18px; opacity: 0.9; }
+        .summary-card .score { font-size: 48px; font-weight: 700; margin: 5px 0; }
+        .summary-card .score-base { font-size: 14px; opacity: 0.8; }
+
+        .employee-panel h2 {
+            font-size: 20px;
+            color: #fff; /* 讓標題在背景上更明顯 */
+            margin-bottom: 10px;
+            border-left: 4px solid #fff;
+            padding-left: 10px;
+            text-align: left;
+        }
+        .record-list .record-item {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .record-item .info .reason { font-size: 16px; font-weight: 500; color: #333; }
+        .record-item .info .date, .record-item .info .notes { font-size: 14px; color: #777; margin-top: 4px; }
+        .record-item .points { font-size: 20px; font-weight: 700; color: #e74c3c; }
+
+        /* 響應式設計：針對小螢幕調整 */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column; /* 管理者儀表板在小螢幕上垂直堆疊 */
+            }
+            .form-panel, .table-panel {
+                min-width: unset;
+                width: 100%;
+            }
+            #admin-section .card, #employee-section .card {
+                padding: 25px;
+            }
+            .admin-header h1 { font-size: 28px; }
+            .employee-header h1 { font-size: 24px; }
+            .employee-panel h2 { font-size: 18px; }
         }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <h1 class="card-title">員工績效系統</h1>
-        <form id="login-form">
-            <div class="input-group">
-                <input type="text" id="username" class="input-field" placeholder="請輸入帳號" required>
+
+    <!-- 1. 登入區塊 (預設顯示) -->
+    <section id="login-section">
+        <div class="card">
+            <h1 class="card-title">員工績效系統</h1>
+            <form id="login-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" class="input-field" placeholder="請輸入帳號" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" class="input-field" placeholder="請輸入密碼" required>
+                </div>
+                <button type="submit" class="submit-btn">登入</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 2. 管理者儀表板區塊 (預設隱藏) -->
+    <section id="admin-section" style="display: none;">
+        <div class="admin-header">
+            <h1>管理者儀表板</h1>
+            <button class="submit-btn" onclick="logout()">登出</button>
+        </div>
+        <div class="dashboard-container">
+            <!-- 左側：新增紀錄表單 -->
+            <div class="admin-panel form-panel">
+                <h2><i class="fas fa-plus-circle"></i> 新增績效紀錄</h2>
+                <form id="add-record-form">
+                    <div class="input-group select-wrapper">
+                        <i class="fas fa-user-plus"></i>
+                        <select id="admin-employee-select" class="input-field">
+                            <option value="" disabled selected>請選擇員工</option>
+                            <option value="陳千慧">陳千慧</option>
+                            <option value="王大明">王大明</option>
+                            <option value="林志強">林志強</option>
+                        </select>
+                    </div>
+                    <div class="input-group select-wrapper">
+                        <i class="fas fa-list-check"></i>
+                        <select id="admin-rule-select" class="input-field">
+                            <option value="" disabled selected>請選擇績效項目</option>
+                            <!-- 這裡的選項會與後端規則一致 -->
+                            <option value="rule_01">補單失誤/遺漏 (-1)</option>
+                            <option value="rule_02a">下單失誤 (可換救) (-2)</option>
+                            <option value="rule_02b">下單失誤 (不可換救) (-5)</option>
+                            <option value="rule_03">點貨失誤 (-2)</option>
+                            <option value="rule_04">排程失誤/遺漏 (-3)</option>
+                            <option value="rule_05">交辦事項遺漏 (-2)</option>
+                            <option value="rule_06">貨區管理不良 (-1)</option>
+                            <option value="rule_07">庫存管理不良 (-1)</option>
+                            <option value="rule_08">交辦事項處理不良 (-1)</option>
+                            <option value="rule_09">接待客戶報價失誤 (-3)</option>
+                            <option value="rule_10">接待客戶介紹失誤 (-3)</option>
+                            <option value="rule_11">遲到 (-10)</option>
+                            <option value="rule_12">漏打卡 (-1)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-pencil-alt"></i>
+                        <textarea id="admin-notes" class="input-field" placeholder="詳細事由 (選填)"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">提交紀錄</button>
+                </form>
             </div>
-            <div class="input-group">
-                <input type="password" id="password" class="input-field" placeholder="請輸入密碼" required>
+
+            <!-- 右側：績效總表 -->
+            <div class="admin-panel table-panel">
+                <h2><i class="fas fa-table"></i> 所有績效紀錄</h2>
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>員工姓名</th>
+                            <th>扣分項目</th>
+                            <th>分數</th>
+                            <th>詳細事由</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 這裡是範例資料，未來會從資料庫動態載入 -->
+                        <tr><td>2026-03-10</td><td>陳千慧</td><td>遲到</td><td>-10</td><td>早上會議遲到15分鐘</td></tr>
+                        <tr><td>2026-03-08</td><td>王大明</td><td>漏打卡</td><td>-1</td><td>下班忘記打卡</td></tr>
+                        <tr><td>2026-03-05</td><td>陳千慧</td><td>補單失誤</td><td>-1</td><td>訂單#5568 補單錯誤</td></tr>
+                        <tr><td>2026-03-01</td><td>林志強</td><td>貨區管理不良</td><td>-1</td><td>A區商品堆放凌亂</td></tr>
+                    </tbody>
+                </table>
             </div>
-            <button type="submit" class="submit-btn">登入</button>
-        </form>
-    </div>
+        </div>
+    </section>
+
+    <!-- 3. 員工績效查看區塊 (預設隱藏) -->
+    <section id="employee-section" style="display: none;">
+        <div class="employee-header">
+            <h1 id="employee-name-display">陳千慧</h1>
+            <p><span id="employee-month-display">2026年 3月</span> 績效報告</p>
+            <button class="submit-btn" onclick="logout()">登出</button>
+        </div>
+
+        <div class="employee-panel">
+            <!-- 當月總分卡片 -->
+            <div class="summary-card">
+                <div class="score-label">本月績效總分</div>
+                <div class="score" id="employee-total-score">89</div>
+                <div class="score-base">起始分數: 100</div>
+            </div>
+
+            <!-- 扣分明細 -->
+            <h2><i class="fas fa-list-ul"></i> 扣分明細</h2>
+            <div class="record-list" id="employee-record-list">
+                <!-- 這裡是範例資料，未來會從資料庫動態載入 -->
+                <div class="record-item">
+                    <div class="info">
+                        <div class="reason">遲到</div>
+                        <div class="date">2026-03-10</div>
+                        <div class="notes">早上會議遲到15分鐘</div>
+                    </div>
+                    <div class="points">-10</div>
+                </div>
+                <div class="record-item">
+                    <div class="info">
+                        <div class="reason">補單失誤</div>
+                        <div class="date">2026-03-05</div>
+                        <div class="notes">訂單#5568 補單錯誤</div>
+                    </div>
+                    <div class="points">-1</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <script>
+        // 獲取所有主要區塊
+        const loginSection = document.getElementById('login-section');
+        const adminSection = document.getElementById('admin-section');
+        const employeeSection = document.getElementById('employee-section');
+
+        // 登入表單提交事件
         document.getElementById('login-form').addEventListener('submit', function(event) {
             event.preventDefault();
             const username = document.getElementById('username').value;
@@ -78,18 +422,63 @@
             // 管理者登入
             if (username.toLowerCase() === 'admin' && password === '671213') {
                 alert('管理者登入成功！');
-                window.location.href = 'admin.html'; // 跳轉到後台頁面
+                loginSection.style.display = 'none'; // 隱藏登入區塊
+                adminSection.style.display = 'block'; // 顯示管理者區塊
+                // 這裡可以呼叫函數來載入管理者數據
+                // loadAdminData();
             } 
             // 員工 陳千慧 登入
             else if (username === '陳千慧' && password === '1005') {
                 alert('陳千慧，您好！');
-                window.location.href = 'employee.html'; // 跳轉到員工頁面
+                loginSection.style.display = 'none'; // 隱藏登入區塊
+                employeeSection.style.display = 'block'; // 顯示員工區塊
+                document.getElementById('employee-name-display').textContent = '陳千慧'; // 更新員工姓名
+                // 這裡可以呼叫函數來載入陳千慧的數據
+                // loadEmployeeData('陳千慧');
             } 
             // 登入失敗
             else {
                 alert('帳號或密碼錯誤！');
             }
         });
+
+        // 管理者新增紀錄表單提交事件
+        document.getElementById('add-record-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const employeeId = document.getElementById('admin-employee-select').value;
+            const ruleId = document.getElementById('admin-rule-select').value;
+            const notes = document.getElementById('admin-notes').value;
+
+            if (!employeeId || !ruleId) {
+                alert('請務必選擇員工和績效項目！');
+                return;
+            }
+
+            console.log('準備提交的資料:', { employeeId, ruleId, notes });
+            alert(`紀錄已暫存 (尚未連接後端):\n員工: ${employeeId}\n項目: ${ruleId}\n事由: ${notes}`);
+
+            // --- 未來串接 Firebase Cloud Function 的程式碼會放在這裡 ---
+            // 這裡將呼叫前面提供的 Firebase Cloud Function (addPerformanceRecord)
+            // 呼叫成功後，可能需要重新載入 adminSection 中的表格數據
+        });
+
+        // 登出功能
+        function logout() {
+            alert('您已登出。');
+            loginSection.style.display = 'flex'; // 顯示登入區塊 (使用flex居中)
+            adminSection.style.display = 'none'; // 隱藏管理者區塊
+            employeeSection.style.display = 'none'; // 隱藏員工區塊
+            document.getElementById('login-form').reset(); // 清空登入表單
+        }
+
+        // 頁面載入時，確保只有登入區塊可見 (防止重新整理後停留在其他頁面)
+        document.addEventListener('DOMContentLoaded', () => {
+            loginSection.style.display = 'flex';
+            adminSection.style.display = 'none';
+            employeeSection.style.display = 'none';
+        });
+
     </script>
+
 </body>
 </html>
