@@ -1,80 +1,180 @@
-// 引用 Firebase Functions 和 Admin SDK
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>員工績效管理後台</title>
+    <style>
+        /* 基本樣式，讓頁面更好看 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* 確保 padding 不會影響寬度 */
+            font-size: 16px;
+        }
+        textarea {
+            resize: vertical; /* 允許使用者調整高度 */
+            min-height: 80px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
 
-// 初始化 Firebase Admin，讓 Function 可以存取其他 Firebase 服務
-admin.initializeApp();
+    <div class="container">
+        <h1>新增績效紀錄</h1>
+        <form id="performance-form">
+            <!-- 1. 選擇員工 -->
+            <div class="form-group">
+                <label for="employee-select">選擇員工</label>
+                <select id="employee-select" name="employee">
+                    <!-- 這裡的員工列表未來會從資料庫動態載入 -->
+                    <option value="emp_01">王大明</option>
+                    <option value="emp_02">陳小美</option>
+                    <option value="emp_03">林志強</option>
+                </select>
+            </div>
 
-/**
- * 新增一筆員工績效紀錄
- * 這是一個 "Callable Function"，可以從您的 App 客戶端安全地呼叫。
- *
- * @param {object} data - 從客戶端傳來的資料。
- * @param {string} data.employeeId - 員工的 ID。
- * @param {string} data.ruleId - 績效規則的 ID。
- * @param {string} data.notes - 管理員填寫的備註 (可選)。
- * @param {object} context - 包含使用者認證資訊的上下文。
- *
- * @returns {Promise<object>} - 回傳操作結果。
- */
-exports.addPerformanceRecord = functions.https.onCall(async (data, context) => {
-  // 1. 驗證呼叫者是否為已登入的使用者
-  // 為了簡化，我們先假設任何登入者都可操作，
-  // 未來您可以加入角色檢查，確保只有 'admin' 能執行。
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "您必須登入才能執行此操作。"
-    );
-  }
+            <!-- 2. 選擇績效規則 -->
+            <div class="form-group">
+                <label for="rule-select">選擇績效項目</label>
+                <select id="rule-select" name="rule">
+                    <!-- 這些規則就是您圖片中的項目 -->
+                    <option value="rule_01">補單失誤/遺漏 (-1)</option>
+                    <option value="rule_02a">下單失誤 (可換救) (-2)</option>
+                    <option value="rule_02b">下單失誤 (不可換救) (-5)</option>
+                    <option value="rule_03">點貨失誤 (-2)</option>
+                    <option value="rule_04">排程失誤/遺漏 (-3)</option>
+                    <option value="rule_05">交辦事項遺漏 (-2)</option>
+                    <option value="rule_06">貨區管理不良 (-1)</option>
+                    <option value="rule_07">庫存管理不良 (-1)</option>
+                    <option value="rule_08">交辦事項處理不良 (-1)</option>
+                    <option value="rule_09">接待客戶報價失誤 (-3)</option>
+                    <option value="rule_10">接待客戶介紹失誤 (-3)</option>
+                    <option value="rule_11">遲到 (-10)</option>
+                    <option value="rule_12">漏打卡 (-1)</option>
+                </select>
+            </div>
 
-  const { employeeId, ruleId, notes } = data;
-  const db = admin.firestore();
+            <!-- 3. 填寫備註 -->
+            <div class="form-group">
+                <label for="notes">詳細備註 (選填)</label>
+                <textarea id="notes" name="notes" placeholder="例如：訂單 #12345 少訂了 A 商品"></textarea>
+            </div>
 
-  // 2. 驗證傳入的參數是否齊全
-  if (!employeeId || !ruleId) {
-    throw new functions.https.HttpsError(
-      "invalid-argument",
-      "缺少必要的參數：員工 ID (employeeId) 或 規則 ID (ruleId)。"
-    );
-  }
+            <!-- 4. 提交按鈕 -->
+            <button type="submit">提交紀錄</button>
+        </form>
+    </div>
 
-  try {
-    // 3. 從 PerformanceRules 集合中獲取規則的詳細資訊 (特別是分數)
-    const ruleDoc = await db.collection("PerformanceRules").doc(ruleId).get();
-    if (!ruleDoc.exists) {
-      throw new functions.https.HttpsError("not-found", "找不到指定的績效規則。");
-    }
-    const ruleData = ruleDoc.data();
-    const points = ruleData.points; // 取得該規則對應的分數
+    <!-- =========== JavaScript 區塊 =========== -->
+    <!-- 
+        要讓這個頁面真正運作，您需要：
+        1. 引入 Firebase SDK
+        2. 初始化 Firebase
+        3. 編寫 JavaScript 程式碼來呼叫我們之前建立的 Cloud Function
+    -->
+    <script>
+        // 獲取表單元素
+        const performanceForm = document.getElementById('performance-form');
 
-    // 4. 準備要寫入資料庫的新紀錄
-    const newRecord = {
-      employeeId: employeeId, // 關聯的員工
-      ruleId: ruleId, // 關聯的規則
-      points: points, // 當時的分數
-      description: ruleData.description, // 當時的規則描述
-      notes: notes || "", // 備註，如果沒有提供則為空字串
-      recordDate: admin.firestore.FieldValue.serverTimestamp(), // 使用伺服器時間作為紀錄時間
-      recordedBy: context.auth.uid, // 記錄是哪個管理者新增的
-    };
+        // 監聽表單的提交事件
+        performanceForm.addEventListener('submit', (event) => {
+            // 防止表單用傳統方式提交，這樣我們才能用 JavaScript 處理
+            event.preventDefault(); 
+            
+            // 從表單中獲取使用者選擇的值
+            const employeeId = document.getElementById('employee-select').value;
+            const ruleId = document.getElementById('rule-select').value;
+            const notes = document.getElementById('notes').value;
 
-    // 5. 將新紀錄寫入 PerformanceRecords 集合
-    const recordRef = await db.collection("PerformanceRecords").add(newRecord);
+            // 在控制台印出我們獲取的資料，方便除錯
+            console.log('準備提交的資料:', {
+                employeeId: employeeId,
+                ruleId: ruleId,
+                notes: notes,
+            });
 
-    console.log(`成功新增績效紀錄，ID 為: ${recordRef.id}`);
+            alert(`您已選擇：\n員工: ${employeeId}\n規則: ${ruleId}\n備註: ${notes}`);
 
-    // 6. 回傳成功訊息
-    return {
-      status: "success",
-      message: "績效紀錄已成功新增！",
-      recordId: recordRef.id,
-    };
-  } catch (error) {
-    console.error("新增績效紀錄時發生錯誤:", error);
-    throw new functions.https.HttpsError(
-      "internal",
-      "處理請求時發生未知的伺服器錯誤。"
-    );
-  }
-});
+            // ------------------------------------------------------------------
+            // 【未來串接 Firebase 的核心程式碼會放在這裡】
+            // 
+            // 1. 您需要先在您的專案中引入 Firebase SDK
+            //    <script src="/__/firebase/8.x.x/firebase-app.js"></script>
+            //    <script src="/__/firebase/8.x.x/firebase-functions.js"></script>
+            //    <script src="/__/firebase/init.js"></script>
+            //
+            // 2. 然後您就可以呼叫我們在後端寫好的 Cloud Function
+            /*
+            const addPerformanceRecord = firebase.functions().httpsCallable('addPerformanceRecord');
+            
+            addPerformanceRecord({ 
+                employeeId: employeeId, 
+                ruleId: ruleId, 
+                notes: notes 
+            })
+            .then((result) => {
+                console.log('Cloud Function 執行成功:', result);
+                alert('績效紀錄已成功新增！');
+                performanceForm.reset(); // 成功後清空表單
+            })
+            .catch((error) => {
+                console.error('Cloud Function 執行失敗:', error);
+                alert('新增失敗：' + error.message);
+            });
+            */
+           // ------------------------------------------------------------------
+        });
+    </script>
+
+</body>
+</html>
