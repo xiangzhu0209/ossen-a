@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>門市績效管理系統 v3.2 (美化版)</title>
+    <title>歐昇績效管理系統 v4.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
     <style>
-        /* --- 核心化變數設定 (現代色系) --- */
         :root {
-            --primary: #4F46E5;       /* 現代靛藍色 */
+            --primary: #4F46E5;
             --primary-hover: #4338CA;
-            --bg-color: #F3F4F6;      /* 柔和灰底 */
+            --bg-color: #F3F4F6;
             --surface: #FFFFFF;
             --text-main: #1F2937;
             --text-muted: #6B7280;
@@ -22,480 +24,233 @@
             --border: #E5E7EB;
         }
 
-        /* --- 核心樣式 --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Noto Sans TC', sans-serif; 
-            background: var(--bg-color); 
-            color: var(--text-main); 
-            min-height: 100vh; 
-            line-height: 1.5;
-        }
+        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg-color); color: var(--text-main); min-height: 100vh; line-height: 1.5; }
         
         section { display: none; padding: 30px 20px; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- 登入卡片 --- */
-        .card { 
-            background: var(--surface); 
-            border-radius: 16px; 
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); 
-            padding: 40px 30px; 
-            margin: 20px auto; 
-            width: 100%; 
-            max-width: 420px; 
-            text-align: center; 
-        }
-        .card h2 { color: var(--primary); font-weight: 700; margin-bottom: 25px; font-size: 24px; }
-
-        /* --- 表單輸入框 --- */
+        .card { background: var(--surface); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); padding: 40px 30px; margin: 20px auto; width: 100%; max-width: 420px; text-align: center; }
         .input-group { position: relative; margin-bottom: 16px; text-align: left; }
-        .input-group i { position: absolute; left: 14px; top: 14px; color: #9CA3AF; transition: 0.3s; }
-        .input-field { 
-            width: 100%; 
-            padding: 12px 12px 12px 40px; 
-            border: 1px solid var(--border); 
-            border-radius: 10px; 
-            font-size: 15px; 
-            background: #F9FAFB;
-            transition: all 0.3s ease; 
-        }
+        .input-group i { position: absolute; left: 14px; top: 14px; color: #9CA3AF; }
+        .input-field { width: 100%; padding: 12px 12px 12px 40px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: #F9FAFB; transition: 0.3s; }
         .input-field.no-icon { padding-left: 12px; }
-        .input-field:focus { 
-            background: var(--surface);
-            border-color: var(--primary); 
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); 
-            outline: none; 
-        }
-        .input-group:focus-within i { color: var(--primary); }
+        .input-field:focus { background: var(--surface); border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
 
-        /* --- 按鈕樣式 --- */
-        .submit-btn { 
-            width: 100%; padding: 12px; border: none; border-radius: 10px; 
-            color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; 
-            background: var(--primary); 
-            transition: all 0.2s ease; 
-            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
-        }
-        .submit-btn:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.3); }
-        .submit-btn:active { transform: translateY(0); }
+        .submit-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; background: var(--primary); transition: 0.2s; }
+        .submit-btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
         
-        .btn-red { background: var(--danger) !important; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2); }
-        .btn-red:hover { background: #DC2626 !important; }
-        .btn-green { background: var(--success) !important; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2); }
-        .btn-green:hover { background: #059669 !important; }
-        .btn-orange { background: var(--warning) !important; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); }
-        .btn-orange:hover { background: #D97706 !important; }
-        
-        .btn-small { 
-            width: auto; padding: 6px 12px; font-size: 13px; font-weight: 500; 
-            border: none; color: #fff; border-radius: 6px; cursor: pointer; transition: 0.2s;
-        }
-        .btn-small:hover { transform: translateY(-1px); }
+        .btn-red { background: var(--danger) !important; }
+        .btn-green { background: var(--success) !important; }
+        .btn-orange { background: var(--warning) !important; }
+        .btn-small { width: auto; padding: 6px 12px; font-size: 13px; border: none; color: #fff; border-radius: 6px; cursor: pointer; }
 
-        /* --- 管理者後台佈局 --- */
-        .admin-header { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto 24px; color: var(--text-main); }
-        .admin-header h2 { font-size: 22px; display: flex; align-items: center; gap: 8px; }
-        
         .admin-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .admin-box { 
-            background: var(--surface); border-radius: 16px; padding: 24px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
-            border: 1px solid rgba(255,255,255,0.5);
-        }
+        .admin-box { background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); }
         .full-width { grid-column: span 2; }
-        
-        h3 { 
-            margin-bottom: 20px; color: var(--text-main); 
-            border-left: 4px solid var(--primary); padding-left: 12px; 
-            font-size: 17px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; 
-        }
+        h3 { border-left: 4px solid var(--primary); padding-left: 12px; margin-bottom: 20px; font-size: 17px; }
 
-        /* 篩選器樣式 */
-        .filter-bar { 
-            display: flex; gap: 12px; margin-bottom: 20px; background: #F9FAFB; 
-            padding: 12px 16px; border-radius: 10px; align-items: center; border: 1px solid var(--border);
-        }
-        .filter-bar span { font-size: 14px; font-weight: 600; color: var(--text-muted); }
-        .filter-select { padding: 8px 12px; border-radius: 8px; border: 1px solid #D1D5DB; font-size: 14px; background: var(--surface); cursor: pointer; outline: none; transition: 0.2s; }
-        .filter-select:focus { border-color: var(--primary); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        th { background: #F9FAFB; color: var(--text-muted); }
 
-        /* 表格優化 */
-        .table-container { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
-        th { background: #F9FAFB; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
-        tr:last-child td { border-bottom: none; }
-        tbody tr { transition: background-color 0.2s; }
-        tbody tr:hover { background-color: #F3F4F6; }
+        .score-card { background: #fff; border-radius: 20px; padding: 30px; text-align: center; margin-bottom: 24px; border: 1px solid var(--border); }
+        .score-num { font-size: 64px; font-weight: 800; color: var(--primary); }
+        .record-item { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
 
-        /* 自訂卷軸 */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
-
-        /* --- 員工端樣式 --- */
-        .employee-header { text-align: center; color: var(--text-main); margin-bottom: 24px; }
-        .employee-header h2 { font-size: 28px; color: var(--primary); margin-bottom: 4px; }
-        .employee-header p { color: var(--text-muted); font-size: 15px; }
-        
-        .score-card { 
-            background: linear-gradient(135deg, #ffffff, #f8fafc); 
-            border-radius: 20px; padding: 30px; text-align: center; margin-bottom: 24px; 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
-            border: 1px solid #e2e8f0;
-        }
-        .score-num { font-size: 64px; font-weight: 800; color: var(--primary); line-height: 1; margin: 10px 0; }
-        
-        .record-item { 
-            background: var(--surface); border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; 
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid var(--border); transition: 0.2s;
-        }
-        .record-item:hover { transform: translateX(4px); border-color: #D1D5DB; }
-
-        @media (max-width: 900px) {
-            .admin-container { grid-template-columns: 1fr; }
-            .full-width { grid-column: span 1; }
-            .filter-bar { flex-direction: column; align-items: stretch; }
-            .filter-bar > div { display: flex; align-items: center; justify-content: space-between; }
-        }
+        @media (max-width: 900px) { .admin-container { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
     </style>
 </head>
 <body>
 
     <section id="login-section" style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
         <div class="card">
-            <h2><i class="fas fa-store"></i> 門市績效系統</h2>
+            <h2 style="color:var(--primary); margin-bottom:20px;">歐昇績效雲端系統</h2>
             <form id="login-form">
-                <div class="input-group">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="username" class="input-field" placeholder="姓名 (管理員輸入 admin)" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" class="input-field" placeholder="密碼" required>
-                </div>
-                <button type="submit" class="submit-btn">登入系統</button>
+                <div class="input-group"><i class="fas fa-user"></i><input type="text" id="username" class="input-field" placeholder="姓名 (管理者輸入 admin)" required></div>
+                <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="password" class="input-field" placeholder="密碼" required></div>
+                <button type="submit" class="submit-btn">進入系統</button>
             </form>
         </div>
     </section>
 
     <section id="admin-section">
-        <div class="admin-header">
-            <h2><i class="fas fa-tools"></i> 管理中心</h2>
-            <button class="btn-red btn-small" onclick="logout()" style="padding: 8px 16px;"><i class="fas fa-sign-out-alt"></i> 登出系統</button>
+        <div style="max-width:1200px; margin:0 auto 20px; display:flex; justify-content:space-between; align-items:center;">
+            <h2>管理後台</h2>
+            <button class="btn-red btn-small" onclick="logout()">登出</button>
         </div>
-
         <div class="admin-container">
             <div class="admin-box">
-                <h3><i class="fas fa-plus-circle" style="color:var(--primary)"></i> 新增紀錄</h3>
+                <h3>新增紀錄</h3>
                 <form id="add-record-form">
-                    <select id="sel-employee" class="input-field no-icon" style="margin-bottom: 12px;" required></select>
-                    <select id="sel-rule" class="input-field no-icon" style="margin-bottom: 12px;" required></select>
-                    <input type="date" id="rec-date" class="input-field no-icon" style="margin-bottom: 12px;" required>
-                    <textarea id="rec-notes" class="input-field no-icon" placeholder="備註事由 (選填)" style="margin-bottom: 16px; height: 60px; resize: none;"></textarea>
-                    <button type="submit" class="submit-btn btn-orange"><i class="fas fa-save"></i> 儲存紀錄</button>
+                    <select id="sel-employee" class="input-field no-icon" style="margin-bottom:10px;"></select>
+                    <select id="sel-rule" class="input-field no-icon" style="margin-bottom:10px;"></select>
+                    <input type="date" id="rec-date" class="input-field no-icon" style="margin-bottom:10px;">
+                    <textarea id="rec-notes" class="input-field no-icon" placeholder="備註" style="height:60px; margin-bottom:10px;"></textarea>
+                    <button type="submit" class="submit-btn btn-orange">儲存雲端</button>
                 </form>
             </div>
-
             <div class="admin-box">
-                <h3><i class="fas fa-users-cog" style="color:var(--primary)"></i> 員工管理</h3>
-                <div class="table-container" style="max-height: 200px; overflow-y: auto;">
-                    <table>
-                        <thead><tr><th>姓名</th><th>密碼</th><th style="text-align:center;">操作</th></tr></thead>
-                        <tbody id="emp-body"></tbody>
-                    </table>
+                <h3>員工管理</h3>
+                <div style="max-height:150px; overflow-y:auto;">
+                    <table><tbody id="emp-body"></tbody></table>
                 </div>
-                <div style="display: flex; gap: 8px; margin-top: 16px;">
-                    <input type="text" id="new-emp-name" class="input-field no-icon" placeholder="姓名" style="flex:2; padding: 8px 12px;">
-                    <input type="text" id="new-emp-pass" class="input-field no-icon" placeholder="密碼" style="flex:1; padding: 8px 12px;">
-                    <button class="btn-green btn-small" onclick="addEmployee()"><i class="fas fa-plus"></i></button>
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <input type="text" id="new-emp-name" class="input-field no-icon" placeholder="姓名" style="padding:8px;">
+                    <input type="text" id="new-emp-pass" class="input-field no-icon" placeholder="密碼" style="padding:8px;">
+                    <button class="btn-green btn-small" onclick="addEmployee()">新增</button>
                 </div>
             </div>
-
-            <div class="admin-box">
-                <h3><i class="fas fa-tasks" style="color:var(--primary)"></i> 項目管理</h3>
-                <div class="table-container" style="max-height: 200px; overflow-y: auto;">
-                    <table>
-                        <thead><tr><th>扣分項目</th><th>分數</th><th style="text-align:center;">操作</th></tr></thead>
-                        <tbody id="rule-body"></tbody>
-                    </table>
-                </div>
-                <div style="display: flex; gap: 8px; margin-top: 16px;">
-                    <input type="text" id="new-rule-name" class="input-field no-icon" placeholder="項目名稱" style="flex:2; padding: 8px 12px;">
-                    <input type="number" id="new-rule-pts" class="input-field no-icon" placeholder="-1" style="flex:1; padding: 8px 12px;">
-                    <button class="btn-green btn-small" onclick="addRule()"><i class="fas fa-plus"></i></button>
-                </div>
-            </div>
-
             <div class="admin-box full-width">
-                <h3>
-                    <span><i class="fas fa-history" style="color:var(--primary)"></i> 績效歷史總表</span>
-                </h3>
-                
-                <div class="filter-bar">
-                    <i class="fas fa-filter" style="color:var(--primary)"></i>
-                    <span>篩選員工：</span>
-                    <select id="filter-emp" class="filter-select" onchange="updateHistoryUI()">
-                        <option value="all">全部員工</option>
-                    </select>
-                    <span style="margin-left:8px;">篩選月份：</span>
-                    <select id="filter-month" class="filter-select" onchange="updateHistoryUI()">
-                        <option value="all">全部月份</option>
-                    </select>
-                    <button class="btn-small" style="background:var(--text-muted); margin-left:auto;" onclick="resetFilters()"><i class="fas fa-sync-alt"></i> 重置</button>
-                </div>
-
-                <div class="table-container">
-                    <table>
-                        <thead><tr><th>日期</th><th>姓名</th><th>項目</th><th>分數</th><th>備註</th><th style="text-align:center;">操作</th></tr></thead>
-                        <tbody id="history-body"></tbody>
-                    </table>
-                </div>
+                <h3>績效歷史總表</h3>
+                <table>
+                    <thead><tr><th>日期</th><th>姓名</th><th>項目</th><th>分數</th><th>備註</th><th>操作</th></tr></thead>
+                    <tbody id="history-body"></tbody>
+                </table>
             </div>
         </div>
     </section>
 
     <section id="employee-section">
-        <div style="max-width: 600px; margin: 0 auto;">
-            <div class="employee-header">
-                <h2 id="emp-welcome-name">姓名</h2>
-                <p>當月績效個人看板</p>
-            </div>
-            
+        <div style="max-width:600px; margin:0 auto;">
+            <h2 id="emp-welcome-name" style="text-align:center;">姓名</h2>
             <div class="score-card">
-                <p style="color: var(--text-muted); font-weight: 500;">本月目前得分</p>
+                <p>本月剩餘分數</p>
                 <div class="score-num" id="emp-score">100</div>
-                <p style="color: #94A3B8; font-size: 13px;"><i class="fas fa-info-circle"></i> 基礎分數設定為 100 分</p>
             </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="margin-bottom: 0; border: none; padding-left: 0;"><i class="fas fa-list-ul" style="color:var(--primary)"></i> 扣分明細</h3>
-                <button class="btn-red btn-small" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 登出</button>
-            </div>
-            
+            <h3>扣分明細</h3>
             <div id="emp-record-list"></div>
+            <button class="btn-red btn-small" onclick="logout()" style="width:100%; margin-top:20px;">安全登出</button>
         </div>
     </section>
 
     <script>
-        // --- 初始資料 ---
-        let employees = [
-            { id: 'e1', name: '陳千慧', password: '1005' },
-            { id: 'e2', name: '王大明', password: '1111' }
-        ];
+        // --- 1. Firebase 配置 ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAsE_7FhCZsJmYqEpRY-ZEB547iTdAc0N8",
+            authDomain: "ossen-performance.firebaseapp.com",
+            databaseURL: "https://ossen-performance-default-rtdb.firebaseio.com",
+            projectId: "ossen-performance",
+            storageBucket: "ossen-performance.firebasestorage.app",
+            messagingSenderId: "485491497119",
+            appId: "1:485491497119:web:3cceb3c94581112ae46aaa",
+            measurementId: "G-MHWXXL641T"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let employees = [];
         let rules = [
             { id: 'r1', name: '補單失誤', pts: -1 },
             { id: 'r2', name: '下單失誤', pts: -5 },
             { id: 'r3', name: '遲到', pts: -10 }
         ];
-        let records = [
-            { id: Date.now(), date: '2026-03-10', empId: 'e1', empName: '陳千慧', ruleName: '遲到', pts: -10, notes: '開會遲到' }
-        ];
+        let records = [];
+        const ADMIN_MASTER_KEY = "671213";
 
-        // --- 登入控制 ---
+        // --- 2. 核心功能：雲端同步 ---
+        function syncFromCloud() {
+            db.ref('/').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    employees = data.employees || [];
+                    records = data.records ? Object.values(data.records) : [];
+                    if (document.getElementById('admin-section').style.display === 'block') initAdmin();
+                    if (document.getElementById('employee-section').style.display === 'block') {
+                        const name = document.getElementById('emp-welcome-name').textContent.replace(' 您好', '');
+                        const emp = employees.find(e => e.name === name);
+                        if (emp) initEmployee(emp);
+                    }
+                }
+            });
+        }
+
+        function saveData() {
+            db.ref('/').set({ employees, records });
+        }
+
+        // --- 3. 登入邏輯 ---
         document.getElementById('login-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
-
-            if (user.toLowerCase() === 'admin' && pass === '671213') {
+            if (user === 'admin' && pass === ADMIN_MASTER_KEY) {
                 showSection('admin-section');
                 initAdmin();
             } else {
-                const emp = employees.find(item => item.name === user && item.password === pass);
+                const emp = employees.find(e => e.name === user && e.password === pass);
                 if (emp) {
                     showSection('employee-section');
                     initEmployee(emp);
-                } else {
-                    alert('帳號或密碼錯誤！\n請檢查是否打錯字。');
-                }
+                } else { alert('登入失敗'); }
             }
         });
 
-        function showSection(id) {
-            document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-            const target = document.getElementById(id);
-            if(id === 'login-section') target.style.display = 'flex';
-            else target.style.display = 'block';
-        }
-
-        // --- 管理者功能 ---
+        // --- 4. UI 更新 ---
         function initAdmin() {
-            updateEmployeeUI();
-            updateRuleUI();
-            updateFilterOptions(); 
-            updateHistoryUI();
+            document.getElementById('emp-body').innerHTML = employees.map(e => `<tr><td>${e.name}</td><td>${e.password}</td><td><button onclick="delEmployee('${e.id}')" class="btn-red btn-small">刪除</button></td></tr>`).join('');
+            document.getElementById('sel-employee').innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            document.getElementById('sel-rule').innerHTML = rules.map(r => `<option value="${r.id}">${r.name} (${r.pts})</option>`).join('');
+            document.getElementById('history-body').innerHTML = records.slice().reverse().map(r => `<tr><td>${r.date}</td><td>${r.empName}</td><td>${r.ruleName}</td><td>${r.pts}</td><td>${r.notes}</td><td><button onclick="delRecord(${r.id})" class="btn-red btn-small">刪</button></td></tr>`).join('');
             document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
         }
 
-        function updateEmployeeUI() {
-            document.getElementById('emp-body').innerHTML = employees.map(e => `
-                <tr>
-                    <td style="font-weight:500;">${e.name}</td>
-                    <td style="color:var(--text-muted);">${e.password}</td>
-                    <td style="text-align:center;"><button class="btn-red btn-small" onclick="delEmployee('${e.id}')"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>
-            `).join('');
-            document.getElementById('sel-employee').innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-            updateFilterOptions();
-        }
-
-        function addEmployee() {
-            const name = document.getElementById('new-emp-name').value.trim();
-            const pass = document.getElementById('new-emp-pass').value.trim();
-            if(!name || !pass) return alert('請填寫完整');
-            employees.push({ id: 'e' + Date.now(), name, password: pass });
-            updateEmployeeUI();
-            document.getElementById('new-emp-name').value = '';
-            document.getElementById('new-emp-pass').value = '';
-        }
-
-        function delEmployee(id) {
-            if(confirm('刪除後該員工將無法登入，確定嗎？')) {
-                employees = employees.filter(e => e.id !== id);
-                updateEmployeeUI();
-            }
-        }
-
-        function updateRuleUI() {
-            document.getElementById('rule-body').innerHTML = rules.map(r => `
-                <tr>
-                    <td style="font-weight:500;">${r.name}</td>
-                    <td style="color:var(--danger); font-weight:700;">${r.pts}</td>
-                    <td style="text-align:center;"><button class="btn-red btn-small" onclick="delRule('${r.id}')"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>
-            `).join('');
-            document.getElementById('sel-rule').innerHTML = rules.map(r => `<option value="${r.id}">${r.name} (${r.pts})</option>`).join('');
-        }
-
-        function addRule() {
-            const name = document.getElementById('new-rule-name').value.trim();
-            const pts = parseInt(document.getElementById('new-rule-pts').value);
-            if(!name || isNaN(pts)) return alert('請輸入項目與分數');
-            rules.push({ id: 'r' + Date.now(), name, pts });
-            updateRuleUI();
-            document.getElementById('new-rule-name').value = '';
-            document.getElementById('new-rule-pts').value = '';
-        }
-
-        function delRule(id) {
-            rules = rules.filter(r => r.id !== id);
-            updateRuleUI();
-        }
-
-        function updateFilterOptions() {
-            const empFilter = document.getElementById('filter-emp');
-            const currentEmp = empFilter.value;
-            empFilter.innerHTML = '<option value="all">全部員工</option>' + 
-                employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-            empFilter.value = currentEmp || 'all';
-
-            const monthFilter = document.getElementById('filter-month');
-            const currentMonth = monthFilter.value;
-            const availableMonths = [...new Set(records.map(r => r.date.substring(0, 7)))].sort().reverse();
-            
-            monthFilter.innerHTML = '<option value="all">全部月份</option>' + 
-                availableMonths.map(m => {
-                    const [y, mm] = m.split('-');
-                    return `<option value="${m}">${y}年 ${parseInt(mm)}月</option>`;
-                }).join('');
-            monthFilter.value = currentMonth || 'all';
-        }
-
-        function updateHistoryUI() {
-            const empFilter = document.getElementById('filter-emp').value;
-            const monthFilter = document.getElementById('filter-month').value;
-            
-            const filteredRecords = records.filter(r => {
-                const matchEmp = (empFilter === 'all' || r.empId === empFilter);
-                const matchMonth = (monthFilter === 'all' || r.date.startsWith(monthFilter));
-                return matchEmp && matchMonth;
-            });
-
-            document.getElementById('history-body').innerHTML = filteredRecords.map(r => `
-                <tr>
-                    <td style="color:var(--text-muted); font-size:13px;">${r.date}</td>
-                    <td style="font-weight:600;">${r.empName}</td>
-                    <td>${r.ruleName}</td>
-                    <td style="color:var(--danger); font-weight:700;">${r.pts}</td>
-                    <td style="color:var(--text-muted); font-size:13px;">${r.notes || '-'}</td>
-                    <td style="text-align:center;"><button class="btn-red btn-small" onclick="delRecord(${r.id})"><i class="fas fa-times"></i></button></td>
-                </tr>
-            `).reverse().join('');
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-emp').value = 'all';
-            document.getElementById('filter-month').value = 'all';
-            updateHistoryUI();
-        }
-
-        document.getElementById('add-record-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const empId = document.getElementById('sel-employee').value;
-            const ruleId = document.getElementById('sel-rule').value;
-            const date = document.getElementById('rec-date').value;
-            const notes = document.getElementById('rec-notes').value.trim();
-
-            const emp = employees.find(e => e.id === empId);
-            const rule = rules.find(r => r.id === ruleId);
-
-            records.push({ id: Date.now(), date, empId, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes });
-            alert('紀錄儲存成功！');
-            updateFilterOptions();
-            updateHistoryUI();
-            document.getElementById('rec-notes').value = '';
-        });
-
-        function delRecord(id) {
-            if(confirm('確定要刪除這筆紀錄嗎？')) {
-                records = records.filter(r => r.id !== id);
-                updateHistoryUI();
-                updateFilterOptions();
-            }
-        }
-
-        // --- 員工端功能 ---
         function initEmployee(emp) {
             document.getElementById('emp-welcome-name').textContent = emp.name + ' 您好';
-            const list = document.getElementById('emp-record-list');
-            
-            const currentMonthStr = new Date().toISOString().substring(0, 7);
-            const empRecords = records.filter(r => r.empId === emp.id && r.date.startsWith(currentMonthStr));
-            
+            const curMonth = new Date().toISOString().substring(0, 7);
+            const myRecords = records.filter(r => r.empId === emp.id && r.date.startsWith(curMonth));
             let score = 100;
-            list.innerHTML = empRecords.map(r => {
+            document.getElementById('emp-record-list').innerHTML = myRecords.map(r => {
                 score += r.pts;
-                return `
-                    <div class="record-item">
-                        <div style="text-align:left;">
-                            <div style="font-weight:700; color:var(--text-main); font-size:16px;">${r.ruleName}</div>
-                            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;"><i class="far fa-calendar-alt"></i> ${r.date}</div>
-                            <div style="font-size:13px; color:var(--text-muted); margin-top:4px; background:#F3F4F6; padding:4px 8px; border-radius:4px; display:${r.notes ? 'inline-block' : 'none'}">${r.notes}</div>
-                        </div>
-                        <div style="font-size:24px; font-weight:800; color:var(--danger);">${r.pts}</div>
-                    </div>
-                `;
+                return `<div class="record-item"><div><b>${r.ruleName}</b><br><small>${r.date}</small></div><div style="color:var(--danger); font-size:20px;">${r.pts}</div></div>`;
             }).join('');
-            
-            if(empRecords.length === 0) {
-                list.innerHTML = `
-                <div style="text-align:center; padding:40px 20px; background:var(--surface); border-radius:12px; border:1px solid var(--border);">
-                    <i class="fas fa-award" style="font-size:48px; color:var(--success); margin-bottom:12px;"></i>
-                    <p style="color:var(--text-main); font-weight:600; font-size:18px;">表現完美！</p>
-                    <p style="color:var(--text-muted); font-size:14px;">本月目前沒有任何扣分紀錄，請繼續保持！</p>
-                </div>`;
-            }
             document.getElementById('emp-score').textContent = score;
         }
 
-        function logout() {
-            showSection('login-section');
-            document.getElementById('login-form').reset();
+        function addEmployee() {
+            const name = document.getElementById('new-emp-name').value;
+            const pass = document.getElementById('new-emp-pass').value;
+            if (name && pass) {
+                employees.push({ id: 'e'+Date.now(), name, password: pass });
+                saveData();
+                document.getElementById('new-emp-name').value = '';
+                document.getElementById('new-emp-pass').value = '';
+            }
         }
+
+        function delEmployee(id) { if(confirm('刪除員工？')) { employees = employees.filter(e => e.id !== id); saveData(); } }
+
+        document.getElementById('add-record-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const empId = document.getElementById('sel-employee').value;
+            const rule = rules.find(r => r.id === document.getElementById('sel-rule').value);
+            const emp = employees.find(e => e.id === empId);
+            records.push({ id: Date.now(), date: document.getElementById('rec-date').value, empId, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes: document.getElementById('rec-notes').value });
+            saveData();
+            document.getElementById('rec-notes').value = '';
+            alert('紀錄成功');
+        });
+
+        function delRecord(id) { if(confirm('刪除紀錄？')) { records = records.filter(r => r.id !== id); saveData(); } }
+        function showSection(id) { document.querySelectorAll('section').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = (id==='login-section'?'flex':'block'); }
+        function logout() { showSection('login-section'); }
+        function syncFromCloud() {
+            db.ref('/').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    employees = data.employees || [];
+                    records = data.records ? (Array.isArray(data.records) ? data.records : Object.values(data.records)) : [];
+                    if (document.getElementById('admin-section').style.display === 'block') initAdmin();
+                    if (document.getElementById('employee-section').style.display === 'block') {
+                        const n = document.getElementById('emp-welcome-name').textContent.replace(' 您好', '');
+                        const e = employees.find(x => x.name === n);
+                        if (e) initEmployee(e);
+                    }
+                }
+            });
+        }
+        syncFromCloud();
     </script>
 </body>
 </html>
