@@ -3,101 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新增績效紀錄</title>
-    <!-- 引入 Google Fonts 和 Font Awesome 圖示庫 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+    <title>績效系統登入</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS 樣式 - 仿照圖片設計 */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
             font-family: 'Noto Sans TC', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            /* 圖片中的漸層背景 */
             background: linear-gradient(135deg, #6DD5FA, #2980B9);
         }
-
-        .card {
+        .login-card {
             background: #ffffff;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             padding: 40px;
-            width: 100%;
-            max-width: 450px;
+            width: 90%;
+            max-width: 400px;
             text-align: center;
         }
-
         .card-title {
             font-size: 28px;
             font-weight: 700;
-            color: #333;
             margin-bottom: 35px;
         }
-
         .input-group {
-            position: relative;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            text-align: left;
         }
-
-        .input-group i {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #888;
-            font-size: 16px;
-        }
-
         .input-field {
             width: 100%;
-            padding: 15px 15px 15px 50px; /* 左邊留出空間給圖示 */
+            padding: 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
-            background-color: #f9f9f9;
-            transition: border-color 0.3s, box-shadow 0.3s;
         }
-
-        .input-field:focus {
-            outline: none;
-            border-color: #2980B9;
-            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
-        }
-        
-        /* 讓 select 和 textarea 有同樣的樣式 */
-        select.input-field {
-            appearance: none; /* 移除預設下拉箭頭 */
-            -webkit-appearance: none;
-            cursor: pointer;
-        }
-
-        /* 自訂下拉箭頭 */
-        .select-wrapper {
-            position: relative;
-        }
-        .select-wrapper::after {
-            content: '\f078'; /* Font Awesome 的下箭頭圖示 */
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #888;
-            pointer-events: none; /* 讓點擊可以穿透 */
-        }
-        
         .submit-btn {
             width: 100%;
             padding: 15px;
@@ -107,86 +48,48 @@
             font-size: 18px;
             font-weight: 700;
             cursor: pointer;
-            /* 按鈕的漸層背景 */
             background: linear-gradient(135deg, #6DD5FA, #2980B9);
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
         }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        }
-
     </style>
 </head>
 <body>
-
-    <div class="card">
-        <h1 class="card-title">新增績效紀錄</h1>
-        <form id="performance-form">
-            
-            <!-- 員工姓名 -->
-            <div class="input-group select-wrapper">
-                <i class="fas fa-user"></i>
-                <select id="employee-select" class="input-field">
-                    <option value="" disabled selected>請選擇員工</option>
-                    <option value="emp_01">王大明</option>
-                    <option value="emp_02">陳小美</option>
-                    <option value="emp_03">林志強</option>
-                </select>
-            </div>
-
-            <!-- 績效項目 -->
-            <div class="input-group select-wrapper">
-                <i class="fas fa-list-check"></i>
-                <select id="rule-select" class="input-field">
-                    <option value="" disabled selected>請選擇績效項目</option>
-                    <option value="rule_01">補單失誤/遺漏 (-1)</option>
-                    <option value="rule_02a">下單失誤 (可換救) (-2)</option>
-                    <option value="rule_02b">下單失誤 (不可換救) (-5)</option>
-                    <option value="rule_03">點貨失誤 (-2)</option>
-                    <option value="rule_04">排程失誤/遺漏 (-3)</option>
-                    <option value="rule_11">遲到 (-10)</option>
-                    <option value="rule_12">漏打卡 (-1)</option>
-                </select>
-            </div>
-
-            <!-- 詳細事由 -->
+    <div class="login-card">
+        <h1 class="card-title">員工績效系統</h1>
+        <form id="login-form">
             <div class="input-group">
-                <i class="fas fa-pencil-alt"></i>
-                <textarea id="notes" class="input-field" placeholder="詳細事由 (選填)"></textarea>
+                <input type="text" id="username" class="input-field" placeholder="請輸入帳號" required>
             </div>
-
-            <!-- 提交按鈕 -->
-            <button type="submit" class="submit-btn">提交紀錄</button>
-
+            <div class="input-group">
+                <input type="password" id="password" class="input-field" placeholder="請輸入密碼" required>
+            </div>
+            <button type="submit" class="submit-btn">登入</button>
         </form>
     </div>
 
-    <!-- JavaScript 邏輯部分保持不變 -->
     <script>
-        const performanceForm = document.getElementById('performance-form');
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-        performanceForm.addEventListener('submit', (event) => {
-            event.preventDefault(); 
+            // --- 登入邏輯判斷 ---
+            // 實際應用中，這部分應由後端處理以確保安全
             
-            const employeeId = document.getElementById('employee-select').value;
-            const ruleId = document.getElementById('rule-select').value;
-            const notes = document.getElementById('notes').value;
-
-            if (!employeeId || !ruleId) {
-                alert('請務必選擇員工和績效項目！');
-                return;
+            // 管理者登入
+            if (username.toLowerCase() === 'admin' && password === '671213') {
+                alert('管理者登入成功！');
+                window.location.href = 'admin.html'; // 跳轉到後台頁面
+            } 
+            // 員工 陳千慧 登入
+            else if (username === '陳千慧' && password === '1005') {
+                alert('陳千慧，您好！');
+                window.location.href = 'employee.html'; // 跳轉到員工頁面
+            } 
+            // 登入失敗
+            else {
+                alert('帳號或密碼錯誤！');
             }
-
-            console.log('準備提交的資料:', { employeeId, ruleId, notes });
-            alert(`紀錄已暫存 (尚未連接後端):\n員工: ${employeeId}\n項目: ${ruleId}\n事由: ${notes}`);
-
-            // 【未來串接 Firebase 的核心程式碼會放在這裡】
-            // ... 這部分邏輯和之前一樣
         });
     </script>
-
 </body>
 </html>
