@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐昇績效管理系統 v5.1</title>
+    <title>歐昇績效管理系統 v5.2 - 備註修正版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
@@ -37,7 +37,7 @@
         .bonus-badge { background: #EEF2FF; color: var(--primary); padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 18px; margin-top: 10px; display: inline-block; }
         .btn-red { background: var(--danger) !important; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
         .btn-green { background: var(--success) !important; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-        .btn-edit { background: var(--warning) !important; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-right: 5px; }
+        .btn-orange { background: var(--warning) !important; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
         .announcement-box { background: #FFFBEB; border-left: 4px solid var(--warning); padding: 15px; border-radius: 12px; margin-bottom: 20px; color: #92400E; }
     </style>
 </head>
@@ -67,7 +67,7 @@
                     <select id="sel-employee" class="input-field no-icon" style="margin-bottom:10px;"></select>
                     <select id="sel-rule" class="input-field no-icon" style="margin-bottom:10px;"></select>
                     <input type="date" id="rec-date" class="input-field no-icon" style="margin-bottom:10px;">
-                    <textarea id="rec-notes" class="input-field no-icon" placeholder="備註原因" style="height:60px; margin-bottom:10px;"></textarea>
+                    <textarea id="rec-notes" class="input-field no-icon" placeholder="備註原因 (非常重要，員工會看到)" style="height:60px; margin-bottom:10px;"></textarea>
                     <button type="submit" class="submit-btn" style="background:var(--warning)">儲存雲端紀錄</button>
                 </form>
             </div>
@@ -103,24 +103,14 @@
             </div>
 
             <div class="admin-box full-width">
-                <h3>扣分標準</h3>
-                <table><tbody id="rule-body"></tbody></table>
-                <div style="display:flex; gap:10px; margin-top:15px;">
-                    <input type="text" id="new-rule-name" class="input-field no-icon" placeholder="項目" style="flex:2;">
-                    <input type="number" id="new-rule-pts" class="input-field no-icon" placeholder="-1" style="flex:1;">
-                    <button class="btn-green" onclick="addRule()">新增</button>
-                </div>
-            </div>
-
-            <div class="admin-box full-width">
-                <h3>歷史總表</h3>
-                <div class="filter-bar">
+                <h3>歷史總表 (含備註)</h3>
+                <div class="filter-bar" style="display:flex; gap:10px; margin-bottom:15px;">
                     <select id="filter-emp" class="input-field no-icon" style="width:auto;" onchange="updateHistoryUI()"></select>
                     <select id="filter-month" class="input-field no-icon" style="width:auto;" onchange="updateHistoryUI()"></select>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
-                        <thead><tr><th>日期</th><th>姓名</th><th>項目</th><th>分數</th><th>操作</th></tr></thead>
+                        <thead><tr><th>日期</th><th>姓名</th><th>項目</th><th>分數</th><th>備註內容</th><th style="text-align:right;">操作</th></tr></thead>
                         <tbody id="history-body"></tbody>
                     </table>
                 </div>
@@ -137,8 +127,7 @@
                 <div class="score-num" id="emp-score">100</div>
                 <div class="bonus-badge" id="emp-bonus-display">預計獎金: $0</div>
             </div>
-            <div class="admin-box" style="margin-bottom:20px;"><div id="emp-bonus-table" style="font-size:13px; color:var(--text-muted);"></div></div>
-            <h3>本月扣分清單</h3>
+            <h3>本月扣分明細 (含備註)</h3>
             <div id="emp-record-list"></div>
             <button class="btn-red" onclick="logout()" style="width:100%; margin-top:20px; padding:12px;">登出</button>
         </div>
@@ -183,9 +172,10 @@
 
         function initAdmin() {
             updateEmployeeUI();
-            updateRuleUI();
             updateFilterOptions();
             updateHistoryUI();
+            // 初始化扣分下拉選單
+            document.getElementById('sel-rule').innerHTML = rules.map(r => `<option value="${r.id}">${r.name} (${r.pts})</option>`).join('');
         }
 
         function updateEmployeeUI() {
@@ -195,8 +185,8 @@
                     <td>${e.password}</td>
                     <td><small>${e.bonusConfig || ''}</small></td>
                     <td style="text-align:right;">
-                        <button class="btn-edit" onclick="prepareEdit('${e.id}')">修改</button>
-                        <button class="btn-red" onclick="delEmployee('${e.id}')">刪</button>
+                        <button class="btn-orange" style="padding:4px 8px; font-size:12px;" onclick="prepareEdit('${e.id}')">修改</button>
+                        <button class="btn-red" style="padding:4px 8px; font-size:12px;" onclick="delEmployee('${e.id}')">刪</button>
                     </td>
                 </tr>
             `).join('');
@@ -205,7 +195,6 @@
             document.getElementById('query-emp').innerHTML = '<option value="">查詢員工...</option>' + opts;
         }
 
-        // 修改功能的核心邏輯
         function prepareEdit(id) {
             const emp = employees.find(e => e.id === id);
             document.getElementById('edit-emp-id').value = emp.id;
@@ -213,9 +202,7 @@
             document.getElementById('new-emp-pass').value = emp.password;
             document.getElementById('new-emp-bonus').value = emp.bonusConfig || "";
             document.getElementById('btn-save-emp').textContent = "儲存修改";
-            document.getElementById('btn-save-emp').classList.replace('btn-green', 'btn-orange');
             document.getElementById('btn-cancel-edit').style.display = "inline-block";
-            document.getElementById('emp-manage-title').textContent = "正在修改員工資料...";
         }
 
         function resetEmpForm() {
@@ -224,9 +211,7 @@
             document.getElementById('new-emp-pass').value = "";
             document.getElementById('new-emp-bonus').value = "";
             document.getElementById('btn-save-emp').textContent = "新增員工";
-            document.getElementById('btn-save-emp').classList.replace('btn-orange', 'btn-green');
             document.getElementById('btn-cancel-edit').style.display = "none";
-            document.getElementById('emp-manage-title').textContent = "員工管理與獎金設定";
         }
 
         function addOrUpdateEmployee() {
@@ -235,16 +220,21 @@
             const pass = document.getElementById('new-emp-pass').value.trim();
             const bonus = document.getElementById('new-emp-bonus').value.trim();
             if (!name || !pass) return alert('請填寫姓名與密碼');
-
             if (id) {
                 const idx = employees.findIndex(e => e.id === id);
                 employees[idx] = { ...employees[idx], name, password: pass, bonusConfig: bonus };
-                alert('修改成功');
             } else {
                 employees.push({ id: 'e'+Date.now(), name, password: pass, bonusConfig: bonus });
-                alert('新增成功');
             }
-            saveData(); resetEmpForm();
+            saveData(); resetEmpForm(); alert('儲存成功');
+        }
+
+        function queryEmpScore() {
+            const id = document.getElementById('query-emp').value;
+            if(!id) return;
+            const emp = employees.find(e => e.id === id);
+            const score = records.filter(r => r.empId === id && r.date.startsWith(new Date().toISOString().substring(0, 7))).reduce((acc, r) => acc + r.pts, 100);
+            document.getElementById('query-result').innerHTML = `<div style="font-size:20px; font-weight:700; color:var(--primary);">${score} 分</div><div>預計獎金: $${calculateBonusLogic(score, emp.bonusConfig)}</div>`;
         }
 
         function calculateBonusLogic(score, config) {
@@ -255,65 +245,99 @@
             return 0;
         }
 
-        function queryEmpScore() {
-            const id = document.getElementById('query-emp').value;
-            if(!id) return;
-            const emp = employees.find(e => e.id === id);
-            const score = records.filter(r => r.empId === id && r.date.startsWith(new Date().toISOString().substring(0, 7))).reduce((acc, r) => acc + r.pts, 100);
-            document.getElementById('query-result').innerHTML = `<div style="font-size:20px; font-weight:700; color:var(--primary);">${score} 分</div><div class="bonus-badge">預計獎金: $${calculateBonusLogic(score, emp.bonusConfig)}</div>`;
-        }
-
+        // --- 核心修正：讓員工看到備註 ---
         function initEmployee(emp) {
             document.getElementById('emp-welcome-name').textContent = emp.name + ' 您好';
-            const annBox = document.getElementById('announcement-display');
-            if(announcement) { annBox.style.display = 'block'; annBox.textContent = "📢 " + announcement; }
-            const myRecords = records.filter(r => r.empId === emp.id && r.date.startsWith(new Date().toISOString().substring(0, 7)));
+            const curMonth = new Date().toISOString().substring(0, 7);
+            const myRecords = records.filter(r => r.empId === emp.id && r.date.startsWith(curMonth));
             let score = 100;
+            
             document.getElementById('emp-record-list').innerHTML = myRecords.map(r => {
                 score += r.pts;
-                return `<div class="record-item" style="background:white; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid var(--border); display:flex; justify-content:space-between;"><div><b>${r.ruleName}</b><br><small>${r.date}</small></div><div style="color:var(--danger); font-weight:bold;">${r.pts}</div></div>`;
-            }).join('') || '<p style="text-align:center;">目前無扣分</p>';
+                return `
+                <div style="background:white; padding:15px; margin-bottom:12px; border-radius:12px; border:1px solid var(--border);">
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <div>
+                            <b style="font-size:16px;">${r.ruleName}</b><br>
+                            <small style="color:var(--text-muted)">日期：${r.date}</small>
+                        </div>
+                        <div style="color:var(--danger); font-weight:bold; font-size:18px;">${r.pts}</div>
+                    </div>
+                    <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #eee; color:var(--primary); font-size:14px;">
+                        <i class="fas fa-comment-dots"></i> 備註：${r.notes || '無'}
+                    </div>
+                </div>`;
+            }).join('') || '<p style="text-align:center; padding:20px;">本月目前無扣分紀錄</p>';
+            
             document.getElementById('emp-score').textContent = score;
             document.getElementById('emp-bonus-display').textContent = `預計獎金: $${calculateBonusLogic(score, emp.bonusConfig)}`;
-            document.getElementById('emp-bonus-table').innerHTML = emp.bonusConfig ? emp.bonusConfig.split(',').map(s => `<div>● 分數滿 ${s.replace(':', ' 分 獎金：$')}</div>`).join('') : "";
+            
+            if(announcement) {
+                document.getElementById('announcement-display').style.display = 'block';
+                document.getElementById('announcement-display').innerHTML = `📢 <b>公告：</b>${announcement}`;
+            } else {
+                document.getElementById('announcement-display').style.display = 'none';
+            }
         }
 
-        function saveAnnouncement() { announcement = document.getElementById('admin-announcement').value; saveData(); alert('公告已更新'); }
-        function updateRuleUI() {
-            document.getElementById('rule-body').innerHTML = rules.map(r => `<tr><td>${r.name}</td><td>${r.pts}</td><td style="text-align:right;"><button class="btn-red" onclick="delRule('${r.id}')">刪</button></td></tr>`).join('');
-            document.getElementById('sel-rule').innerHTML = rules.map(r => `<option value="${r.id}">${r.name} (${r.pts})</option>`).join('');
+        // --- 核心修正：讓管理者在總表看到備註 ---
+        function updateHistoryUI() {
+            const ef = document.getElementById('filter-emp').value;
+            const mf = document.getElementById('filter-month').value;
+            const filtered = records.filter(r => (ef==='all' || r.empId===ef) && (mf==='all' || r.date.startsWith(mf)));
+            
+            document.getElementById('history-body').innerHTML = filtered.slice().reverse().map(r => `
+                <tr>
+                    <td>${r.date}</td>
+                    <td><b>${r.empName}</b></td>
+                    <td>${r.ruleName}</td>
+                    <td style="color:var(--danger); font-weight:bold;">${r.pts}</td>
+                    <td style="color:var(--primary);"><small>${r.notes || '-'}</small></td>
+                    <td style="text-align:right;"><button class="btn-red" style="padding:2px 6px;" onclick="delRecord(${r.id})">刪</button></td>
+                </tr>
+            `).join('');
         }
-        function addRule() { const name = document.getElementById('new-rule-name').value.trim(), pts = parseInt(document.getElementById('new-rule-pts').value); if(name && !isNaN(pts)) { rules.push({id:'r'+Date.now(), name, pts}); saveData(); } }
-        function delRule(id) { if(confirm('刪除項目？')) { rules = rules.filter(r => r.id !== id); saveData(); } }
-        function delEmployee(id) { if(confirm('刪除員工？')) { employees = employees.filter(e => e.id !== id); saveData(); } }
-        function delRecord(id) { if(confirm('刪除紀錄？')) { records = records.filter(r => r.id !== id); saveData(); } }
-        function logout() { location.reload(); }
-        function showSection(id) { document.querySelectorAll('section').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = (id === 'login-section' ? 'flex' : 'block'); }
-        
+
+        document.getElementById('add-record-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const eid = document.getElementById('sel-employee').value;
+            const rule = rules.find(r => r.id === document.getElementById('sel-rule').value);
+            const emp = employees.find(e => e.id === eid);
+            const notes = document.getElementById('rec-notes').value.trim();
+            
+            if(!eid || !rule) return alert('請選擇員工與項目');
+
+            records.push({ 
+                id: Date.now(), 
+                date: document.getElementById('rec-date').value, 
+                empId: eid, 
+                empName: emp.name, 
+                ruleName: rule.name, 
+                pts: rule.pts, 
+                notes: notes // 確保備註被存入
+            });
+            saveData(); 
+            document.getElementById('rec-notes').value = ''; 
+            alert('紀錄存入成功！');
+        });
+
         function updateFilterOptions() {
             document.getElementById('filter-emp').innerHTML = '<option value="all">所有員工</option>' + employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
             const months = [...new Set(records.map(r => r.date.substring(0, 7)))].sort().reverse();
             document.getElementById('filter-month').innerHTML = '<option value="all">所有月份</option>' + months.map(m => `<option value="${m}">${m}</option>`).join('');
         }
 
-        function updateHistoryUI() {
-            const ef = document.getElementById('filter-emp').value, mf = document.getElementById('filter-month').value;
-            const filtered = records.filter(r => (ef==='all' || r.empId===ef) && (mf==='all' || r.date.startsWith(mf)));
-            document.getElementById('history-body').innerHTML = filtered.slice().reverse().map(r => `<tr><td>${r.date.substring(5)}</td><td>${r.empName}</td><td>${r.ruleName}</td><td>${r.pts}</td><td><button class="btn-red" onclick="delRecord(${r.id})">刪</button></td></tr>`).join('');
-        }
+        function saveAnnouncement() { announcement = document.getElementById('admin-announcement').value; saveData(); alert('公告已更新'); }
+        function delEmployee(id) { if(confirm('刪除員工？')) { employees = employees.filter(e => e.id !== id); saveData(); } }
+        function delRecord(id) { if(confirm('刪除紀錄？')) { records = records.filter(r => r.id !== id); saveData(); } }
+        function logout() { location.reload(); }
+        function showSection(id) { document.querySelectorAll('section').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = (id === 'login-section' ? 'flex' : 'block'); }
 
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const u = document.getElementById('username').value.trim(), p = document.getElementById('password').value.trim();
             if(u === 'admin' && p === ADMIN_MASTER_KEY) { showSection('admin-section'); initAdmin(); }
-            else { const emp = employees.find(e => e.name === u && e.password === p); if(emp) { showSection('employee-section'); initEmployee(emp); } else alert('錯誤'); }
-        });
-
-        document.getElementById('add-record-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const eid = document.getElementById('sel-employee').value, rule = rules.find(r => r.id === document.getElementById('sel-rule').value), emp = employees.find(e => e.id === eid);
-            records.push({ id: Date.now(), date: document.getElementById('rec-date').value, empId: eid, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes: document.getElementById('rec-notes').value });
-            saveData(); alert('儲存成功');
+            else { const emp = employees.find(e => e.name === u && e.password === p); if(emp) { showSection('employee-section'); initEmployee(emp); } else alert('帳號密碼錯誤'); }
         });
 
         syncFromCloud();
