@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐昇績效管理系統 v5.5</title>
+    <title>歐昇績效管理系統 v5.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -18,13 +18,13 @@
         .admin-box { background: var(--surface); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); }
         .full-width { grid-column: span 2; }
         h3 { border-left: 3px solid var(--primary); padding-left: 12px; margin-bottom: 20px; font-size: 17px; font-weight: 700; }
-        .input-field { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; margin-bottom: 10px; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; margin-bottom: 10px; background: #fff; }
         .submit-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; background: var(--primary); }
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
         th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid var(--border); }
         .btn-red { background: var(--danger); color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
         .btn-gray { background: #4B5563; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
-        .bonus-badge { background: #f3f3f3; padding: 5px 15px; border-radius: 20px; font-weight: 700; border: 1px solid var(--border); }
+        .bonus-badge { background: #f3f3f3; padding: 8px 15px; border-radius: 12px; font-weight: 700; border: 1px solid var(--border); display: inline-block; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -61,22 +61,38 @@
             </div>
 
             <div class="admin-box">
-                <h3>扣分規則管理</h3>
-                <div style="max-height:150px; overflow-y:auto; margin-bottom:10px;">
-                    <table id="rule-list"></table>
-                </div>
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="new-rule-name" class="input-field" placeholder="項目" style="flex:2;">
-                    <input type="number" id="new-rule-pts" class="input-field" placeholder="分數" style="flex:1;">
-                    <button class="btn-gray" style="height:42px;" onclick="addRule()">新增項目</button>
+                <h3>即時分數查詢</h3>
+                <select id="query-emp" class="input-field" onchange="queryEmpScore()">
+                    <option value="">選擇員工查詢...</option>
+                </select>
+                <div id="query-result" style="text-align:center; padding:20px; background:#fafafa; border-radius:12px; border:1px dashed var(--border); min-height: 120px;">
+                    <p style="color:var(--text-muted)">請選擇員工以查看本月分數</p>
                 </div>
             </div>
 
+            <div class="admin-box">
+                <h3>扣分規則管理</h3>
+                <div style="max-height:150px; overflow-y:auto; margin-bottom:10px; border: 1px solid var(--border); border-radius: 8px;">
+                    <table id="rule-list"></table>
+                </div>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="new-rule-name" class="input-field" placeholder="項目" style="flex:2; margin-bottom:0;">
+                    <input type="number" id="new-rule-pts" class="input-field" placeholder="分" style="flex:1; margin-bottom:0;">
+                    <button class="btn-gray" onclick="addRule()">新增</button>
+                </div>
+            </div>
+
+            <div class="admin-box">
+                <h3>公告設定</h3>
+                <textarea id="admin-announcement" class="input-field" placeholder="輸入消息..." style="height:60px; margin-bottom: 10px;"></textarea>
+                <button class="btn-gray" style="width:100%; height:45px;" onclick="saveAnnouncement()">更新公告</button>
+            </div>
+
             <div class="admin-box full-width">
-                <h3>歷史扣分明細</h3>
+                <h3>歷史扣分明細 (含備註)</h3>
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <select id="filter-emp" onchange="updateHistoryUI()" class="input-field" style="width:auto;"></select>
-                    <select id="filter-month" onchange="updateHistoryUI()" class="input-field" style="width:auto;"></select>
+                    <select id="filter-emp" onchange="updateHistoryUI()" class="input-field" style="width:auto; margin-bottom:0;"></select>
+                    <select id="filter-month" onchange="updateHistoryUI()" class="input-field" style="width:auto; margin-bottom:0;"></select>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
@@ -91,10 +107,10 @@
                 <table><tbody id="emp-body"></tbody></table>
                 <div style="display:flex; gap:5px; margin-top:15px;">
                     <input type="hidden" id="edit-emp-id">
-                    <input type="text" id="new-emp-name" class="input-field" placeholder="姓名" style="flex:1;">
-                    <input type="text" id="new-emp-pass" class="input-field" placeholder="密碼" style="flex:1;">
-                    <input type="text" id="new-emp-bonus" class="input-field" placeholder="級距 (100:2000, 79:-1000)" style="flex:2;">
-                    <button class="btn-gray" onclick="addOrUpdateEmployee()">儲存員工</button>
+                    <input type="text" id="new-emp-name" class="input-field" placeholder="姓名" style="flex:1; margin-bottom:0;">
+                    <input type="text" id="new-emp-pass" class="input-field" placeholder="密碼" style="flex:1; margin-bottom:0;">
+                    <input type="text" id="new-emp-bonus" class="input-field" placeholder="級距 (100:2000, 79:-1000)" style="flex:2; margin-bottom:0;">
+                    <button class="btn-gray" onclick="addOrUpdateEmployee()">儲存</button>
                 </div>
             </div>
         </div>
@@ -102,6 +118,7 @@
 
     <section id="employee-section">
         <div style="max-width:600px; margin:0 auto;">
+            <div id="announcement-display" style="background:#000; color:#fff; padding:15px; border-radius:8px; margin-bottom:20px; display:none;"></div>
             <h2 id="emp-welcome-name" style="text-align:center;">姓名</h2>
             <div style="background:#fff; border-radius:16px; padding:30px; text-align:center; margin:20px 0; border:1px solid var(--border);">
                 <div style="font-size:64px; font-weight:800;" id="emp-score">100</div>
@@ -125,7 +142,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let employees = [], rules = [], records = [];
+        let employees = [], rules = [], records = [], announcement = "";
         const ADMIN_MASTER_KEY = "671213";
 
         function syncFromCloud() {
@@ -135,28 +152,33 @@
                     employees = data.employees || [];
                     rules = data.rules || [];
                     records = data.records ? (Array.isArray(data.records) ? data.records : Object.values(data.records)) : [];
+                    announcement = data.announcement || "";
                     if (document.getElementById('admin-section').style.display === 'block') initAdmin();
                 }
             });
         }
 
-        function saveData() { db.ref('/').update({ employees, rules, records }); }
+        function saveData() { db.ref('/').update({ employees, rules, records, announcement }); }
 
         function initAdmin() {
-            // 更新員工選單
             document.getElementById('sel-employee').innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-            // 更新規則選單
+            document.getElementById('query-emp').innerHTML = '<option value="">選擇員工查詢...</option>' + employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
             document.getElementById('sel-rule').innerHTML = rules.map(r => `<option value="${r.id}">${r.name} (${r.pts})</option>`).join('');
-            // 更新規則列表
-            document.getElementById('rule-list').innerHTML = rules.map(r => `<tr><td>${r.name}</td><td>${r.pts}</td><td style="text-align:right;"><button class="btn-red" onclick="delRule('${r.id}')">刪</button></td></tr>`).join('');
-            // 更新員工列表
+            document.getElementById('rule-list').innerHTML = rules.map(r => `<tr><td>${r.name}</td><td>${r.pts}</td><td style="text-align:right;"><button class="btn-red" style="padding:2px 6px;" onclick="delRule('${r.id}')">刪</button></td></tr>`).join('');
             document.getElementById('emp-body').innerHTML = employees.map(e => `<tr><td>${e.name}</td><td>${e.password}</td><td>${e.bonusConfig || ''}</td><td><button class="btn-gray" onclick="prepareEditEmp('${e.id}')">改</button> <button class="btn-red" onclick="delEmployee('${e.id}')">刪</button></td></tr>`).join('');
-            
             updateFilterOptions();
             updateHistoryUI();
         }
 
-        // --- 修正問題：修改時連動項目選單 ---
+        // --- 核心查詢功能 ---
+        function queryEmpScore() {
+            const id = document.getElementById('query-emp').value;
+            if(!id) { document.getElementById('query-result').innerHTML = '<p style="color:var(--text-muted)">請選擇員工以查看本月分數</p>'; return; }
+            const emp = employees.find(e => e.id === id);
+            const score = records.filter(r => r.empId === id && r.date.startsWith(new Date().toISOString().substring(0, 7))).reduce((acc, r) => acc + r.pts, 100);
+            document.getElementById('query-result').innerHTML = `<div style="font-size:32px; font-weight:800;">${score} 分</div><div class="bonus-badge">預計獎金: $${calculateBonusLogic(score, emp.bonusConfig)}</div>`;
+        }
+
         function prepareRecordEdit(id) {
             const rec = records.find(r => r.id == id);
             if(!rec) return;
@@ -164,30 +186,11 @@
             document.getElementById('sel-employee').value = rec.empId;
             document.getElementById('rec-date').value = rec.date;
             document.getElementById('rec-notes').value = rec.notes || "";
-            
-            // 關鍵修正：透過項目名稱找到對應的 rule.id 並選取
             const targetRule = rules.find(r => r.name === rec.ruleName);
             if(targetRule) document.getElementById('sel-rule').value = targetRule.id;
-
             document.getElementById('record-form-title').textContent = "正在修改紀錄...";
             document.getElementById('btn-cancel-rec-edit').style.display = "block";
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function addRule() {
-            const name = document.getElementById('new-rule-name').value.trim();
-            const pts = parseInt(document.getElementById('new-rule-pts').value);
-            if(!name || isNaN(pts)) return;
-            rules.push({ id: 'r'+Date.now(), name, pts });
-            saveData();
-            document.getElementById('new-rule-name').value = ''; document.getElementById('new-rule-pts').value = '';
-        }
-
-        function resetRecordForm() {
-            document.getElementById('edit-record-id').value = "";
-            document.getElementById('rec-notes').value = "";
-            document.getElementById('record-form-title').textContent = "新增/修改扣分";
-            document.getElementById('btn-cancel-rec-edit').style.display = "none";
         }
 
         document.getElementById('add-record-form').addEventListener('submit', (e) => {
@@ -198,7 +201,6 @@
             const emp = employees.find(e => e.id === eid);
             const notes = document.getElementById('rec-notes').value.trim();
             const date = document.getElementById('rec-date').value;
-
             if(rid) {
                 const idx = records.findIndex(r => r.id == rid);
                 records[idx] = { ...records[idx], empId: eid, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes: notes, date: date };
@@ -208,20 +210,20 @@
             saveData(); resetRecordForm(); alert('儲存成功');
         });
 
-        function updateHistoryUI() {
-            const ef = document.getElementById('filter-emp').value, mf = document.getElementById('filter-month').value;
-            const filtered = records.filter(r => (ef==='all' || r.empId===ef) && (mf==='all' || r.date.startsWith(mf)));
-            document.getElementById('history-body').innerHTML = filtered.slice().reverse().map(r => `
-                <tr><td>${r.date.substring(5)}</td><td><b>${r.empName}</b></td><td>${r.ruleName}</td><td>${r.pts}</td><td><small>${r.notes || '-'}</small></td>
-                <td><button class="btn-gray" onclick="prepareRecordEdit(${r.id})">改</button> <button class="btn-red" onclick="delRecord(${r.id})">刪</button></td></tr>`).join('');
-        }
-
         function calculateBonusLogic(score, config) {
             if(!config) return 0;
             const pairs = config.split(',').map(s => s.trim().split(':')).filter(p => p.length === 2);
             pairs.sort((a, b) => b[0] - a[0]);
             for(let [threshold, amount] of pairs) { if(score >= parseInt(threshold)) return amount; }
             return pairs.length > 0 ? pairs[pairs.length-1][1] : 0;
+        }
+
+        function updateHistoryUI() {
+            const ef = document.getElementById('filter-emp').value, mf = document.getElementById('filter-month').value;
+            const filtered = records.filter(r => (ef==='all' || r.empId===ef) && (mf==='all' || r.date.startsWith(mf)));
+            document.getElementById('history-body').innerHTML = filtered.slice().reverse().map(r => `
+                <tr><td>${r.date.substring(5)}</td><td><b>${r.empName}</b></td><td>${r.ruleName}</td><td>${r.pts}</td><td><small>${r.notes || '-'}</small></td>
+                <td><button class="btn-gray" onclick="prepareRecordEdit(${r.id})">改</button> <button class="btn-red" onclick="delRecord(${r.id})">刪</button></td></tr>`).join('');
         }
 
         function initEmployee(emp) {
@@ -237,22 +239,20 @@
             }).join('') || '<p style="text-align:center;">本月目前無扣分</p>';
             document.getElementById('emp-score').textContent = score;
             document.getElementById('emp-bonus-display').textContent = `預計獎金: $${calculateBonusLogic(score, emp.bonusConfig)}`;
+            if(announcement) {
+                document.getElementById('announcement-display').style.display = 'block';
+                document.getElementById('announcement-display').textContent = '📢 ' + announcement;
+            }
         }
 
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const u = document.getElementById('username').value.trim(), p = document.getElementById('password').value.trim();
-            if(u === 'admin' && p === ADMIN_MASTER_KEY) { 
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('admin-section').style.display = 'block';
-                initAdmin();
-            } else {
+            if(u === 'admin' && p === ADMIN_MASTER_KEY) { document.getElementById('login-section').style.display = 'none'; document.getElementById('admin-section').style.display = 'block'; initAdmin(); }
+            else { 
                 const emp = employees.find(e => e.name === u && e.password === p);
-                if(emp) {
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('employee-section').style.display = 'block';
-                    initEmployee(emp);
-                } else alert('登入失敗');
+                if(emp) { document.getElementById('login-section').style.display = 'none'; document.getElementById('employee-section').style.display = 'block'; initEmployee(emp); }
+                else alert('登入失敗');
             }
         });
 
@@ -261,24 +261,14 @@
             const months = [...new Set(records.map(r => r.date.substring(0, 7)))].sort().reverse();
             document.getElementById('filter-month').innerHTML = '<option value="all">所有月份</option>' + months.map(m => `<option value="${m}">${m}</option>`).join('');
         }
-        function delRule(id) { if(confirm('刪除規則？')) { rules = rules.filter(r => r.id !== id); saveData(); } }
-        function delRecord(id) { if(confirm('刪除紀錄？')) { records = records.filter(r => r.id != id); saveData(); } }
-        function delEmployee(id) { if(confirm('刪除員工？')) { employees = employees.filter(e => e.id !== id); saveData(); } }
-        function prepareEditEmp(id) {
-            const emp = employees.find(e => e.id === id);
-            document.getElementById('edit-emp-id').value = emp.id;
-            document.getElementById('new-emp-name').value = emp.name;
-            document.getElementById('new-emp-pass').value = emp.password;
-            document.getElementById('new-emp-bonus').value = emp.bonusConfig || "";
-        }
-        function addOrUpdateEmployee() {
-            const id = document.getElementById('edit-emp-id').value, name = document.getElementById('new-emp-name').value.trim(), pass = document.getElementById('new-emp-pass').value.trim(), bonus = document.getElementById('new-emp-bonus').value.trim();
-            if (!name || !pass) return;
-            if (id) { const idx = employees.findIndex(e => e.id === id); employees[idx] = { ...employees[idx], name, password: pass, bonusConfig: bonus }; }
-            else { employees.push({ id: 'e'+Date.now(), name, password: pass, bonusConfig: bonus }); }
-            saveData();
-            document.getElementById('edit-emp-id').value = ""; document.getElementById('new-emp-name').value = ""; document.getElementById('new-emp-pass').value = ""; document.getElementById('new-emp-bonus').value = "";
-        }
+        function addRule() { const name = document.getElementById('new-rule-name').value.trim(), pts = parseInt(document.getElementById('new-rule-pts').value); if(!name || isNaN(pts)) return; rules.push({ id: 'r'+Date.now(), name, pts }); saveData(); document.getElementById('new-rule-name').value = ''; document.getElementById('new-rule-pts').value = ''; }
+        function delRule(id) { if(confirm('刪？')) { rules = rules.filter(r => r.id !== id); saveData(); } }
+        function delRecord(id) { if(confirm('刪？')) { records = records.filter(r => r.id != id); saveData(); } }
+        function delEmployee(id) { if(confirm('刪？')) { employees = employees.filter(e => e.id !== id); saveData(); } }
+        function saveAnnouncement() { announcement = document.getElementById('admin-announcement').value; saveData(); alert('更新成功'); }
+        function resetRecordForm() { document.getElementById('edit-record-id').value = ""; document.getElementById('rec-notes').value = ""; document.getElementById('record-form-title').textContent = "新增/修改扣分"; document.getElementById('btn-cancel-rec-edit').style.display = "none"; }
+        function prepareEditEmp(id) { const emp = employees.find(e => e.id === id); document.getElementById('edit-emp-id').value = emp.id; document.getElementById('new-emp-name').value = emp.name; document.getElementById('new-emp-pass').value = emp.password; document.getElementById('new-emp-bonus').value = emp.bonusConfig || ""; }
+        function addOrUpdateEmployee() { const id = document.getElementById('edit-emp-id').value, name = document.getElementById('new-emp-name').value.trim(), pass = document.getElementById('new-emp-pass').value.trim(), bonus = document.getElementById('new-emp-bonus').value.trim(); if (!name || !pass) return; if (id) { const idx = employees.findIndex(e => e.id === id); employees[idx] = { ...employees[idx], name, password: pass, bonusConfig: bonus }; } else { employees.push({ id: 'e'+Date.now(), name, password: pass, bonusConfig: bonus }); } saveData(); document.getElementById('edit-emp-id').value = ""; document.getElementById('new-emp-name').value = ""; document.getElementById('new-emp-pass').value = ""; document.getElementById('new-emp-bonus').value = ""; }
 
         syncFromCloud();
         document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
