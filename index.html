@@ -3,80 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐昇績效管理系統 v5.4</title>
+    <title>歐昇績效管理系統 v5.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-
     <style>
-        :root {
-            /* 新配色：黑白灰 */
-            --primary: #000000;          /* 純黑 */
-            --primary-hover: #1F2937;    /* 深灰 */
-            --bg-color: #F9FAFB;         /* 淺灰背景 */
-            --surface: #FFFFFF;          /* 白色卡片 */
-            --text-main: #111827;        /* 黑字 */
-            --text-muted: #6B7280;       /* 灰字 */
-            --border: #E5E7EB;           /* 淡灰線 */
-            --btn-warn: #4B5563;         /* 修改按鈕-灰 */
-            
-            /* 保留警示色，但稍微淡化 */
-            --danger: #EF4444; 
-            --success: #6B7280; /* 改為灰 */
-        }
+        :root { --primary: #000000; --bg-color: #F9FAFB; --surface: #FFFFFF; --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB; --danger: #EF4444; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg-color); color: var(--text-main); min-height: 100vh; line-height: 1.5; }
-        section { display: none; padding: 30px 20px; animation: fadeIn 0.4s ease-out; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg-color); color: var(--text-main); line-height: 1.5; }
+        section { display: none; padding: 30px 20px; animation: fadeIn 0.4s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .card { background: var(--surface); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 40px 30px; margin: 20px auto; width: 100%; max-width: 420px; text-align: center; }
-        
-        .input-group { position: relative; margin-bottom: 16px; text-align: left; }
-        .input-group i { position: absolute; left: 14px; top: 14px; color: var(--text-muted); }
-        .input-field { width: 100%; padding: 12px 12px 12px 40px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; background: #fff; transition: 0.2s; }
-        .input-field.no-icon { padding-left: 12px; }
-        .input-field:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 1px #000; }
-
-        .submit-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; background: var(--primary); transition: 0.2s; }
-        .submit-btn:hover { background: var(--primary-hover); }
-        
         .admin-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .admin-box { background: var(--surface); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .admin-box { background: var(--surface); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); }
         .full-width { grid-column: span 2; }
         h3 { border-left: 3px solid var(--primary); padding-left: 12px; margin-bottom: 20px; font-size: 17px; font-weight: 700; }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
-        th { background: #fdfdfd; color: var(--text-muted); font-weight: 500; }
-        tr:hover { background-color: #fbfbfb; }
-
-        .score-card { background: var(--surface); border-radius: 16px; padding: 30px; text-align: center; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .score-num { font-size: 64px; font-weight: 800; color: var(--text-main); }
-        .bonus-badge { background: #f3f3f3; color: var(--text-main); padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 18px; margin-top: 10px; display: inline-block; border: 1px solid var(--border); }
-        
-        .btn-red { background: var(--danger) !important; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-        .btn-orange { background: var(--btn-warn) !important; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-        .btn-green { background: #fff !important; color: #000; border: 1px solid #000; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-        .btn-green:hover { background: #000 !important; color: #fff; }
-
-        .announcement-box { background: #000; color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
-        
-        /* 篩選器樣式優化 */
-        .filter-bar select { background: #fff; border: 1px solid var(--border); padding: 8px; border-radius: 6px; }
-
-        @media (max-width: 900px) { .admin-container { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
+        .input-field { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; margin-bottom: 10px; }
+        .submit-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; background: var(--primary); }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+        .btn-red { background: var(--danger); color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+        .btn-gray { background: #4B5563; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+        .bonus-badge { background: #f3f3f3; padding: 5px 15px; border-radius: 20px; font-weight: 700; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
     <section id="login-section" style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
-        <div class="card">
-            <h2 style="color:var(--text-main); margin-bottom:20px; font-weight: 700;">歐昇績效管理系統</h2>
+        <div class="admin-box" style="width: 100%; max-width: 400px; text-align: center;">
+            <h2 style="margin-bottom:20px;">歐昇績效管理系統</h2>
             <form id="login-form">
-                <div class="input-group"><i class="fas fa-user"></i><input type="text" id="username" class="input-field" placeholder="姓名 (管理者 admin)" required></div>
-                <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="password" class="input-field" placeholder="密碼" required></div>
+                <input type="text" id="username" class="input-field" placeholder="姓名 (管理者 admin)" required>
+                <input type="password" id="password" class="input-field" placeholder="密碼" required>
                 <button type="submit" class="submit-btn">進入系統</button>
             </form>
         </div>
@@ -84,83 +42,77 @@
 
     <section id="admin-section">
         <div style="max-width:1200px; margin:0 auto 20px; display:flex; justify-content:space-between; align-items:center;">
-            <h2><i class="fas fa-user-shield"></i> 管理總部</h2>
-            <button class="btn-red" onclick="logout()">安全登出</button>
+            <h2>管理總部</h2>
+            <button class="btn-red" onclick="location.reload()">登出</button>
         </div>
         
         <div class="admin-container">
             <div class="admin-box">
-                <h3 id="record-form-title">新增紀錄</h3>
+                <h3 id="record-form-title">新增/修改扣分</h3>
                 <form id="add-record-form">
                     <input type="hidden" id="edit-record-id">
-                    <select id="sel-employee" class="input-field no-icon" style="margin-bottom:10px;"></select>
-                    <select id="sel-rule" class="input-field no-icon" style="margin-bottom:10px;"></select>
-                    <input type="date" id="rec-date" class="input-field no-icon" style="margin-bottom:10px;">
-                    <textarea id="rec-notes" class="input-field no-icon" placeholder="備註原因 (員工會看到)" style="height:60px; margin-bottom:10px;"></textarea>
-                    <div style="display:flex; gap:10px;">
-                        <button type="submit" id="btn-save-record" class="submit-btn" style="flex:2;">儲存雲端紀錄</button>
-                        <button type="button" id="btn-cancel-rec-edit" class="btn-orange" style="display:none; flex:1;" onclick="resetRecordForm()">取消修改</button>
-                    </div>
+                    <select id="sel-employee" class="input-field"></select>
+                    <select id="sel-rule" class="input-field"></select>
+                    <input type="date" id="rec-date" class="input-field">
+                    <textarea id="rec-notes" class="input-field" placeholder="備註原因" style="height:60px;"></textarea>
+                    <button type="submit" id="btn-save-record" class="submit-btn">儲存至雲端</button>
+                    <button type="button" id="btn-cancel-rec-edit" class="btn-gray" style="display:none; width:100%; margin-top:5px;" onclick="resetRecordForm()">取消修改</button>
                 </form>
             </div>
 
             <div class="admin-box">
-                <h3>分數即時查詢</h3>
-                <select id="query-emp" class="input-field no-icon" onchange="queryEmpScore()" style="margin-bottom:15px;"></select>
-                <div id="query-result" style="text-align:center; padding:15px; background:#fafafa; border-radius:8px; border:1px dashed var(--border);"></div>
+                <h3>扣分規則管理</h3>
+                <div style="max-height:150px; overflow-y:auto; margin-bottom:10px;">
+                    <table id="rule-list"></table>
+                </div>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="new-rule-name" class="input-field" placeholder="項目" style="flex:2;">
+                    <input type="number" id="new-rule-pts" class="input-field" placeholder="分數" style="flex:1;">
+                    <button class="btn-gray" style="height:42px;" onclick="addRule()">新增項目</button>
+                </div>
             </div>
 
             <div class="admin-box full-width">
-                <h3>歷史總表 (可修改內容)</h3>
-                <div class="filter-bar" style="display:flex; gap:10px; margin-bottom:15px;">
-                    <select id="filter-emp" onchange="updateHistoryUI()"></select>
-                    <select id="filter-month" onchange="updateHistoryUI()"></select>
+                <h3>歷史扣分明細</h3>
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <select id="filter-emp" onchange="updateHistoryUI()" class="input-field" style="width:auto;"></select>
+                    <select id="filter-month" onchange="updateHistoryUI()" class="input-field" style="width:auto;"></select>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
-                        <thead><tr><th>日期</th><th>姓名</th><th>項目</th><th>分數</th><th>備註</th><th style="text-align:right;">操作</th></tr></thead>
+                        <thead><tr><th>日期</th><th>姓名</th><th>項目</th><th>分數</th><th>備註</th><th>操作</th></tr></thead>
                         <tbody id="history-body"></tbody>
                     </table>
                 </div>
             </div>
 
             <div class="admin-box full-width">
-                <h3 id="emp-manage-title">員工帳號與獎金對照</h3>
-                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;">
-                    <table><tbody id="emp-body"></tbody></table>
+                <h3>員工帳號管理</h3>
+                <table><tbody id="emp-body"></tbody></table>
+                <div style="display:flex; gap:5px; margin-top:15px;">
+                    <input type="hidden" id="edit-emp-id">
+                    <input type="text" id="new-emp-name" class="input-field" placeholder="姓名" style="flex:1;">
+                    <input type="text" id="new-emp-pass" class="input-field" placeholder="密碼" style="flex:1;">
+                    <input type="text" id="new-emp-bonus" class="input-field" placeholder="級距 (100:2000, 79:-1000)" style="flex:2;">
+                    <button class="btn-gray" onclick="addOrUpdateEmployee()">儲存員工</button>
                 </div>
-                <div id="emp-form-area" style="display:flex; gap:8px; flex-wrap: wrap; background:#fafafa; padding:15px; border-radius:8px; border: 1px solid var(--border);">
-                    <input type="hidden" id="edit-emp-id"><input type="text" id="new-emp-name" class="input-field no-icon" placeholder="姓名" style="flex:1;"><input type="text" id="new-emp-pass" class="input-field no-icon" placeholder="密碼" style="flex:1;"><input type="text" id="new-emp-bonus" class="input-field no-icon" placeholder="例如 100:2000, 79:-1000" style="flex:2;">
-                    <button id="btn-save-emp" class="btn-green" onclick="addOrUpdateEmployee()"><i class="fas fa-check"></i> 儲存</button>
-                    <button id="btn-cancel-edit" class="btn-orange" onclick="resetEmpForm()" style="display:none;">取消</button>
-                </div>
-            </div>
-            
-            <div class="admin-box full-width">
-                <h3>公告設定</h3>
-                <textarea id="admin-announcement" class="input-field no-icon" placeholder="輸入消息..." style="height:60px; margin-bottom:10px;"></textarea>
-                <button class="submit-btn" onclick="saveAnnouncement()"><i class="fas fa-sync"></i> 更新公告</button>
             </div>
         </div>
     </section>
 
     <section id="employee-section">
         <div style="max-width:600px; margin:0 auto;">
-            <div id="announcement-display" class="announcement-box" style="display:none;"></div>
             <h2 id="emp-welcome-name" style="text-align:center;">姓名</h2>
-            <div class="score-card">
-                <p style="color:var(--text-muted)">本月評分</p>
-                <div class="score-num" id="emp-score">100</div>
+            <div style="background:#fff; border-radius:16px; padding:30px; text-align:center; margin:20px 0; border:1px solid var(--border);">
+                <div style="font-size:64px; font-weight:800;" id="emp-score">100</div>
                 <div class="bonus-badge" id="emp-bonus-display">預計獎金: $0</div>
             </div>
-            <h3>本月扣分明細</h3>
             <div id="emp-record-list"></div>
-            <button class="btn-red" onclick="logout()" style="width:100%; margin-top:20px; padding:12px; font-weight: 700;">登出</button>
+            <button class="btn-red" onclick="location.reload()" style="width:100%; padding:12px; margin-top:20px;">登出系統</button>
         </div>
     </section>
 
     <script>
-        // --- 核心設定 (保留原封不動) ---
         const firebaseConfig = {
             apiKey: "AIzaSyAsE_7FhCZsJmYqEpRY-ZEB547iTdAc0N8",
             authDomain: "ossen-performance.firebaseapp.com",
@@ -173,11 +125,9 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        let employees = [], rules = [], records = [], announcement = "";
+        let employees = [], rules = [], records = [];
         const ADMIN_MASTER_KEY = "671213";
 
-        // --- 核心同步 (保留所有備註功能) ---
         function syncFromCloud() {
             db.ref('/').on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -185,39 +135,28 @@
                     employees = data.employees || [];
                     rules = data.rules || [];
                     records = data.records ? (Array.isArray(data.records) ? data.records : Object.values(data.records)) : [];
-                    announcement = data.announcement || "";
                     if (document.getElementById('admin-section').style.display === 'block') initAdmin();
-                    if (document.getElementById('employee-section').style.display === 'block') {
-                        const name = document.getElementById('emp-welcome-name').textContent.replace(' 您好', '');
-                        const emp = employees.find(e => e.name === name);
-                        if (emp) initEmployee(emp);
-                    }
                 }
             });
         }
 
-        function saveData() { db.ref('/').update({ employees, rules, records, announcement }); }
+        function saveData() { db.ref('/').update({ employees, rules, records }); }
 
-        // --- 功能邏輯 (保留修改、負獎金功能) ---
         function initAdmin() {
-            updateEmployeeUI();
+            // 更新員工選單
+            document.getElementById('sel-employee').innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            // 更新規則選單
+            document.getElementById('sel-rule').innerHTML = rules.map(r => `<option value="${r.id}">${r.name} (${r.pts})</option>`).join('');
+            // 更新規則列表
+            document.getElementById('rule-list').innerHTML = rules.map(r => `<tr><td>${r.name}</td><td>${r.pts}</td><td style="text-align:right;"><button class="btn-red" onclick="delRule('${r.id}')">刪</button></td></tr>`).join('');
+            // 更新員工列表
+            document.getElementById('emp-body').innerHTML = employees.map(e => `<tr><td>${e.name}</td><td>${e.password}</td><td>${e.bonusConfig || ''}</td><td><button class="btn-gray" onclick="prepareEditEmp('${e.id}')">改</button> <button class="btn-red" onclick="delEmployee('${e.id}')">刪</button></td></tr>`).join('');
+            
             updateFilterOptions();
             updateHistoryUI();
-            document.getElementById('sel-rule').innerHTML = rules.map(r => `<option value="${r.id}">${r.name} (${r.pts})</option>`).join('');
         }
 
-        function updateEmployeeUI() {
-            document.getElementById('emp-body').innerHTML = employees.map(e => `
-                <tr><td>${e.name}</td><td>${e.password}</td><td><small>${e.bonusConfig || ''}</small></td>
-                <td style="text-align:right;">
-                    <button class="btn-orange" style="padding:4px 8px; font-size:12px;" onclick="prepareEdit('${e.id}')">改</button>
-                    <button class="btn-red" style="padding:4px 8px; font-size:12px;" onclick="delEmployee('${e.id}')">刪</button>
-                </td></tr>`).join('');
-            const opts = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-            document.getElementById('sel-employee').innerHTML = opts;
-            document.getElementById('query-emp').innerHTML = '<option value="">查詢員工...</option>' + opts;
-        }
-
+        // --- 修正問題：修改時連動項目選單 ---
         function prepareRecordEdit(id) {
             const rec = records.find(r => r.id == id);
             if(!rec) return;
@@ -225,17 +164,29 @@
             document.getElementById('sel-employee').value = rec.empId;
             document.getElementById('rec-date').value = rec.date;
             document.getElementById('rec-notes').value = rec.notes || "";
+            
+            // 關鍵修正：透過項目名稱找到對應的 rule.id 並選取
+            const targetRule = rules.find(r => r.name === rec.ruleName);
+            if(targetRule) document.getElementById('sel-rule').value = targetRule.id;
+
             document.getElementById('record-form-title').textContent = "正在修改紀錄...";
-            document.getElementById('btn-save-record').textContent = "儲存修改";
-            document.getElementById('btn-cancel-rec-edit').style.display = "inline-block";
+            document.getElementById('btn-cancel-rec-edit').style.display = "block";
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function addRule() {
+            const name = document.getElementById('new-rule-name').value.trim();
+            const pts = parseInt(document.getElementById('new-rule-pts').value);
+            if(!name || isNaN(pts)) return;
+            rules.push({ id: 'r'+Date.now(), name, pts });
+            saveData();
+            document.getElementById('new-rule-name').value = ''; document.getElementById('new-rule-pts').value = '';
         }
 
         function resetRecordForm() {
             document.getElementById('edit-record-id').value = "";
             document.getElementById('rec-notes').value = "";
-            document.getElementById('record-form-title').textContent = "新增紀錄";
-            document.getElementById('btn-save-record').textContent = "儲存雲端紀錄";
+            document.getElementById('record-form-title').textContent = "新增/修改扣分";
             document.getElementById('btn-cancel-rec-edit').style.display = "none";
         }
 
@@ -246,102 +197,88 @@
             const rule = rules.find(r => r.id === document.getElementById('sel-rule').value);
             const emp = employees.find(e => e.id === eid);
             const notes = document.getElementById('rec-notes').value.trim();
+            const date = document.getElementById('rec-date').value;
+
             if(rid) {
                 const idx = records.findIndex(r => r.id == rid);
-                records[idx] = { ...records[idx], empId: eid, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes: notes, date: document.getElementById('rec-date').value };
+                records[idx] = { ...records[idx], empId: eid, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes: notes, date: date };
             } else {
-                records.push({ id: Date.now(), date: document.getElementById('rec-date').value, empId: eid, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes: notes });
+                records.push({ id: Date.now(), date: date, empId: eid, empName: emp.name, ruleName: rule.name, pts: rule.pts, notes: notes });
             }
-            saveData(); resetRecordForm();
+            saveData(); resetRecordForm(); alert('儲存成功');
         });
+
+        function updateHistoryUI() {
+            const ef = document.getElementById('filter-emp').value, mf = document.getElementById('filter-month').value;
+            const filtered = records.filter(r => (ef==='all' || r.empId===ef) && (mf==='all' || r.date.startsWith(mf)));
+            document.getElementById('history-body').innerHTML = filtered.slice().reverse().map(r => `
+                <tr><td>${r.date.substring(5)}</td><td><b>${r.empName}</b></td><td>${r.ruleName}</td><td>${r.pts}</td><td><small>${r.notes || '-'}</small></td>
+                <td><button class="btn-gray" onclick="prepareRecordEdit(${r.id})">改</button> <button class="btn-red" onclick="delRecord(${r.id})">刪</button></td></tr>`).join('');
+        }
 
         function calculateBonusLogic(score, config) {
             if(!config) return 0;
             const pairs = config.split(',').map(s => s.trim().split(':')).filter(p => p.length === 2);
             pairs.sort((a, b) => b[0] - a[0]);
             for(let [threshold, amount] of pairs) { if(score >= parseInt(threshold)) return amount; }
-            return pairs.length > 0 ? pairs[pairs.length - 1][1] : 0;
-        }
-
-        function queryEmpScore() {
-            const id = document.getElementById('query-emp').value;
-            if(!id) return;
-            const emp = employees.find(e => e.id === id);
-            const score = records.filter(r => r.empId === id && r.date.startsWith(new Date().toISOString().substring(0, 7))).reduce((acc, r) => acc + r.pts, 100);
-            document.getElementById('query-result').innerHTML = `<div style="font-size:20px; font-weight:700;">${score} 分</div><div class="bonus-badge">預計獎金: $${calculateBonusLogic(score, emp.bonusConfig)}</div>`;
+            return pairs.length > 0 ? pairs[pairs.length-1][1] : 0;
         }
 
         function initEmployee(emp) {
             document.getElementById('emp-welcome-name').textContent = emp.name;
-            const curMonth = new Date().toISOString().substring(0, 7);
-            const myRecords = records.filter(r => r.empId === emp.id && r.date.startsWith(curMonth));
+            const myRecords = records.filter(r => r.empId === emp.id && r.date.startsWith(new Date().toISOString().substring(0, 7)));
             let score = 100;
             document.getElementById('emp-record-list').innerHTML = myRecords.map(r => {
                 score += r.pts;
-                return `<div style="background:var(--surface); padding:15px; margin-bottom:10px; border-radius:8px; border:1px solid var(--border);">
-                    <div style="display:flex; justify-content:space-between; font-weight: 700;"><b>${r.ruleName} (${r.pts})</b><small style="color:var(--text-muted); font-weight: 400;">${r.date.substring(5)}</small></div>
-                    <div style="color:var(--primary); font-size:13px; margin-top:5px; border-top:1px dashed var(--border); padding-top:5px;">${r.notes || '無備註'}</div>
+                return `<div style="background:#fff; padding:15px; margin-bottom:10px; border-radius:8px; border:1px solid var(--border);">
+                    <div style="display:flex; justify-content:space-between; font-weight:700;">${r.ruleName} (${r.pts}) <small>${r.date.substring(5)}</small></div>
+                    <div style="margin-top:5px; border-top:1px dashed #eee; padding-top:5px; font-size:13px; color:var(--primary);">備註：${r.notes || '無'}</div>
                 </div>`;
-            }).join('') || '<p style="text-align:center;">本月無扣分紀錄</p>';
+            }).join('') || '<p style="text-align:center;">本月目前無扣分</p>';
             document.getElementById('emp-score').textContent = score;
             document.getElementById('emp-bonus-display').textContent = `預計獎金: $${calculateBonusLogic(score, emp.bonusConfig)}`;
-            if(announcement) { document.getElementById('announcement-display').style.display = 'block'; document.getElementById('announcement-display').innerHTML = annBox.innerHTML = `📢 ${announcement}`; }
-            else { document.getElementById('announcement-display').style.display = 'none'; }
         }
 
-        function updateHistoryUI() {
-            const ef = document.getElementById('filter-emp').value, mf = document.getElementById('filter-month').value;
-            const filtered = records.filter(r => (ef==='all' || r.empId===ef) && (mf==='all' || r.date.startsWith(mf)));
-            document.getElementById('history-body').innerHTML = filtered.slice().reverse().map(r => `
-                <tr><td>${r.date.substring(5)}</td><td><b>${r.empName}</b></td><td>${r.ruleName}</td><td>${r.pts}</td><td style="color:var(--primary)"><small>${r.notes || '-'}</small></td>
-                <td style="text-align:right;">
-                    <button class="btn-orange" style="padding:2px 6px;" onclick="prepareRecordEdit(${r.id})">改</button>
-                    <button class="btn-red" style="padding:2px 6px;" onclick="delRecord(${r.id})">刪</button>
-                </td></tr>`).join('');
-        }
-
-        // --- 登入與其他工具 (維持原樣) ---
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const u = document.getElementById('username').value.trim(), p = document.getElementById('password').value.trim();
-            if(u === 'admin' && p === ADMIN_MASTER_KEY) { showSection('admin-section'); initAdmin(); }
-            else { const emp = employees.find(e => e.name === u && e.password === p); if(emp) { showSection('employee-section'); initEmployee(emp); } else alert('錯'); }
+            if(u === 'admin' && p === ADMIN_MASTER_KEY) { 
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('admin-section').style.display = 'block';
+                initAdmin();
+            } else {
+                const emp = employees.find(e => e.name === u && e.password === p);
+                if(emp) {
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('employee-section').style.display = 'block';
+                    initEmployee(emp);
+                } else alert('登入失敗');
+            }
         });
 
-        function resetEmpForm() {
-            document.getElementById('edit-emp-id').value = "";
-            document.getElementById('new-emp-name').value = "";
-            document.getElementById('new-emp-pass').value = "";
-            document.getElementById('new-emp-bonus').value = "";
-            document.getElementById('btn-save-emp').textContent = "儲存";
-            document.getElementById('btn-cancel-edit').style.display = "none";
+        function updateFilterOptions() {
+            document.getElementById('filter-emp').innerHTML = '<option value="all">所有員工</option>' + employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            const months = [...new Set(records.map(r => r.date.substring(0, 7)))].sort().reverse();
+            document.getElementById('filter-month').innerHTML = '<option value="all">所有月份</option>' + months.map(m => `<option value="${m}">${m}</option>`).join('');
         }
-        function prepareEdit(id) {
+        function delRule(id) { if(confirm('刪除規則？')) { rules = rules.filter(r => r.id !== id); saveData(); } }
+        function delRecord(id) { if(confirm('刪除紀錄？')) { records = records.filter(r => r.id != id); saveData(); } }
+        function delEmployee(id) { if(confirm('刪除員工？')) { employees = employees.filter(e => e.id !== id); saveData(); } }
+        function prepareEditEmp(id) {
             const emp = employees.find(e => e.id === id);
             document.getElementById('edit-emp-id').value = emp.id;
             document.getElementById('new-emp-name').value = emp.name;
             document.getElementById('new-emp-pass').value = emp.password;
             document.getElementById('new-emp-bonus').value = emp.bonusConfig || "";
-            document.getElementById('btn-save-emp').textContent = "儲存修改";
-            document.getElementById('btn-cancel-edit').style.display = "inline-block";
         }
         function addOrUpdateEmployee() {
             const id = document.getElementById('edit-emp-id').value, name = document.getElementById('new-emp-name').value.trim(), pass = document.getElementById('new-emp-pass').value.trim(), bonus = document.getElementById('new-emp-bonus').value.trim();
             if (!name || !pass) return;
             if (id) { const idx = employees.findIndex(e => e.id === id); employees[idx] = { ...employees[idx], name, password: pass, bonusConfig: bonus }; }
             else { employees.push({ id: 'e'+Date.now(), name, password: pass, bonusConfig: bonus }); }
-            saveData(); resetEmpForm();
+            saveData();
+            document.getElementById('edit-emp-id').value = ""; document.getElementById('new-emp-name').value = ""; document.getElementById('new-emp-pass').value = ""; document.getElementById('new-emp-bonus').value = "";
         }
-        function updateFilterOptions() {
-            document.getElementById('filter-emp').innerHTML = '<option value="all">所有員工</option>' + employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-            const months = [...new Set(records.map(r => r.date.substring(0, 7)))].sort().reverse();
-            document.getElementById('filter-month').innerHTML = '<option value="all">所有月份</option>' + months.map(m => `<option value="${m}">${m}</option>`).join('');
-        }
-        function saveAnnouncement() { announcement = document.getElementById('admin-announcement').value; saveData(); alert('更新'); }
-        function logout() { location.reload(); }
-        function showSection(id) { document.querySelectorAll('section').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = (id === 'login-section' ? 'flex' : 'block'); }
-        function delEmployee(id) { if(confirm('刪？')) { employees = employees.filter(e => e.id !== id); saveData(); } }
-        function delRecord(id) { if(confirm('刪？')) { records = records.filter(r => r.id != id); saveData(); } }
 
         syncFromCloud();
         document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
