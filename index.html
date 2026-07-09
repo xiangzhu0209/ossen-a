@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐昇績效管理系統 v5.6</title>
+    <title>歐昇績效管理系統 v5.7</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #000000; --bg-color: #F9FAFB; --surface: #FFFFFF; --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB; --danger: #EF4444; }
+        :root { --primary: #000000; --bg-color: #F9FAFB; --surface: #FFFFFF; --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB; --danger: #EF4444; --success: #10B981;}
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg-color); color: var(--text-main); line-height: 1.5; }
         section { display: none; padding: 30px 20px; animation: fadeIn 0.4s; }
@@ -24,6 +24,7 @@
         th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid var(--border); }
         .btn-red { background: var(--danger); color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
         .btn-gray { background: #4B5563; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+        .btn-green { background: var(--success); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight:bold; }
         .bonus-badge { background: #f3f3f3; padding: 8px 15px; border-radius: 12px; font-weight: 700; border: 1px solid var(--border); display: inline-block; margin-top: 10px; }
     </style>
 </head>
@@ -61,12 +62,17 @@
             </div>
 
             <div class="admin-box">
-                <h3>即時分數查詢</h3>
-                <select id="query-emp" class="input-field" onchange="queryEmpScore()">
-                    <option value="">選擇員工查詢...</option>
-                </select>
+                <h3>各月分數查詢</h3>
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <select id="query-month" class="input-field" style="margin-bottom:0;" onchange="queryEmpScore()">
+                        <option value="">讀取中...</option>
+                    </select>
+                    <select id="query-emp" class="input-field" style="margin-bottom:0;" onchange="queryEmpScore()">
+                        <option value="">選擇員工查詢...</option>
+                    </select>
+                </div>
                 <div id="query-result" style="text-align:center; padding:20px; background:#fafafa; border-radius:12px; border:1px dashed var(--border); min-height: 120px;">
-                    <p style="color:var(--text-muted)">請選擇員工以查看本月分數</p>
+                    <p style="color:var(--text-muted)">請選擇員工以查看分數</p>
                 </div>
             </div>
 
@@ -90,9 +96,10 @@
 
             <div class="admin-box full-width">
                 <h3>歷史扣分明細 (含備註)</h3>
-                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
                     <select id="filter-emp" onchange="updateHistoryUI()" class="input-field" style="width:auto; margin-bottom:0;"></select>
                     <select id="filter-month" onchange="updateHistoryUI()" class="input-field" style="width:auto; margin-bottom:0;"></select>
+                    <button class="btn-green" onclick="exportToCSV()">下載為 Excel</button>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
@@ -170,13 +177,15 @@
             updateHistoryUI();
         }
 
-        // --- 核心查詢功能 ---
+        // --- 核心查詢功能 (已更新支援月份) ---
         function queryEmpScore() {
             const id = document.getElementById('query-emp').value;
-            if(!id) { document.getElementById('query-result').innerHTML = '<p style="color:var(--text-muted)">請選擇員工以查看本月分數</p>'; return; }
+            const month = document.getElementById('query-month').value;
+            if(!id) { document.getElementById('query-result').innerHTML = '<p style="color:var(--text-muted)">請選擇員工以查看分數</p>'; return; }
             const emp = employees.find(e => e.id === id);
-            const score = records.filter(r => r.empId === id && r.date.startsWith(new Date().toISOString().substring(0, 7))).reduce((acc, r) => acc + r.pts, 100);
-            document.getElementById('query-result').innerHTML = `<div style="font-size:32px; font-weight:800;">${score} 分</div><div class="bonus-badge">預計獎金: $${calculateBonusLogic(score, emp.bonusConfig)}</div>`;
+            // 改為依照選擇的月份加總
+            const score = records.filter(r => r.empId === id && r.date.startsWith(month)).reduce((acc, r) => acc + r.pts, 100);
+            document.getElementById('query-result').innerHTML = `<div style="font-size:32px; font-weight:800;">${score} 分</div><div class="bonus-badge">該月結算獎金: $${calculateBonusLogic(score, emp.bonusConfig)}</div>`;
         }
 
         function prepareRecordEdit(id) {
@@ -256,15 +265,67 @@
             }
         });
 
+        // --- 選單更新機制 (自動抓取過往月份) ---
         function updateFilterOptions() {
             document.getElementById('filter-emp').innerHTML = '<option value="all">所有員工</option>' + employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-            const months = [...new Set(records.map(r => r.date.substring(0, 7)))].sort().reverse();
+            
+            // 找出所有存在紀錄的月份
+            let months = [...new Set(records.map(r => r.date.substring(0, 7)))];
+            const currentMonth = new Date().toISOString().substring(0, 7);
+            if(!months.includes(currentMonth)) months.push(currentMonth); // 確保當前月份一定存在
+            months.sort().reverse(); // 由新到舊排序
+            
+            // 歷史明細的月份選單
             document.getElementById('filter-month').innerHTML = '<option value="all">所有月份</option>' + months.map(m => `<option value="${m}">${m}</option>`).join('');
+            
+            // 查詢分數的月份選單
+            const qMonthSelect = document.getElementById('query-month');
+            const previousQMonth = qMonthSelect.value;
+            qMonthSelect.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
+            qMonthSelect.value = previousQMonth || currentMonth; // 預設顯示當前月份
         }
+
+        // --- 新增：匯出 Excel (CSV) 功能 ---
+        function exportToCSV() {
+            const ef = document.getElementById('filter-emp').value;
+            const mf = document.getElementById('filter-month').value;
+            // 抓取畫面上目前篩選的資料
+            const filtered = records.filter(r => (ef==='all' || r.empId===ef) && (mf==='all' || r.date.startsWith(mf)));
+            
+            if(filtered.length === 0) { alert('目前沒有任何明細可以匯出！'); return; }
+
+            // 產生 CSV 內容 (\uFEFF 確保 Excel 打開中文不會亂碼)
+            let csvContent = "\uFEFF日期,姓名,項目,分數,備註\n";
+            
+            filtered.slice().reverse().forEach(r => {
+                // 處理備註裡的換行或逗號，避免破壞 CSV 格式
+                let notes = r.notes ? r.notes.replace(/"/g, '""') : '';
+                if (notes.includes(',') || notes.includes('\n')) {
+                    notes = `"${notes}"`;
+                }
+                csvContent += `${r.date},${r.empName},${r.ruleName},${r.pts},${notes}\n`;
+            });
+
+            // 產生下載檔案
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            
+            // 設定檔名 (動態抓取：績效明細_2023-10_王小明.csv)
+            let empNameText = (ef === 'all') ? "全體員工" : employees.find(e => e.id === ef).name;
+            let monthText = (mf === 'all') ? "全區間" : mf;
+            link.setAttribute("download", `績效明細_${monthText}_${empNameText}.csv`);
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function addRule() { const name = document.getElementById('new-rule-name').value.trim(), pts = parseInt(document.getElementById('new-rule-pts').value); if(!name || isNaN(pts)) return; rules.push({ id: 'r'+Date.now(), name, pts }); saveData(); document.getElementById('new-rule-name').value = ''; document.getElementById('new-rule-pts').value = ''; }
-        function delRule(id) { if(confirm('刪？')) { rules = rules.filter(r => r.id !== id); saveData(); } }
-        function delRecord(id) { if(confirm('刪？')) { records = records.filter(r => r.id != id); saveData(); } }
-        function delEmployee(id) { if(confirm('刪？')) { employees = employees.filter(e => e.id !== id); saveData(); } }
+        function delRule(id) { if(confirm('確定刪除此規則？')) { rules = rules.filter(r => r.id !== id); saveData(); } }
+        function delRecord(id) { if(confirm('確定刪除此紀錄？')) { records = records.filter(r => r.id != id); saveData(); } }
+        function delEmployee(id) { if(confirm('確定刪除此員工？')) { employees = employees.filter(e => e.id !== id); saveData(); } }
         function saveAnnouncement() { announcement = document.getElementById('admin-announcement').value; saveData(); alert('更新成功'); }
         function resetRecordForm() { document.getElementById('edit-record-id').value = ""; document.getElementById('rec-notes').value = ""; document.getElementById('record-form-title').textContent = "新增/修改扣分"; document.getElementById('btn-cancel-rec-edit').style.display = "none"; }
         function prepareEditEmp(id) { const emp = employees.find(e => e.id === id); document.getElementById('edit-emp-id').value = emp.id; document.getElementById('new-emp-name').value = emp.name; document.getElementById('new-emp-pass').value = emp.password; document.getElementById('new-emp-bonus').value = emp.bonusConfig || ""; }
